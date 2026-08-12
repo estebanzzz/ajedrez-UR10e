@@ -18,7 +18,10 @@ Especificación completa en [PROYECTO_ROBOT_AJEDREZ.md](../PROYECTO_ROBOT_AJEDRE
   (sensores → detector → motor → robot) con manejo de errores, verificación
   física de las jugadas del robot y modo resync; API REST + WebSocket de
   partida. Pendiente validar sobre hardware real.
-- ⬜ Fase 5 — UI de exposición (React kiosk)
+- 🔶 **Fase 5 — UI de exposición**: frontend React kiosk (tablero en vivo,
+  barra de evaluación, dificultad, panel de operador oculto) servido en
+  `/ui`, más systemd y guía de kiosk para la Pi. Pendiente: puesta a punto
+  final sobre el hardware (velocidades, pruebas de estrés).
 
 ## Backend — Fase 1
 
@@ -127,3 +130,29 @@ cd backend
 - Sin hardware todo corre simulado: driver mock + robot simulado, y el mundo
   virtual se actualiza solo tras cada jugada del robot. En la Pi:
   `CHESS_DRIVER=matrix CHESS_ROBOT_HOST=<ip-del-UR>`.
+
+## Frontend — Fase 5 (UI de exposición)
+
+React + Vite, sin dependencias pesadas (tablero propio renderizado desde el
+FEN). Consume `/ws/game` y `/ws/sensors` con reconexión automática.
+
+- **Pantalla pública**: tablero en vivo con última jugada resaltada, barra de
+  evaluación, mensajes al público ("Tu turno", "Pensando…", "¡Jaque!"),
+  historial SAN y selector de dificultad.
+- **Panel de operador oculto** (5 toques rápidos sobre el título): nueva
+  partida, confirmar jugada, verificación de resync, mapa de sensores en vivo
+  y estado completo. Las casillas en conflicto se resaltan en rojo sobre el
+  tablero durante `human_error`/`resync`.
+
+```bash
+cd frontend
+npm install
+npm run build        # el backend sirve dist/ en http://localhost:8000/ui
+npm run dev          # desarrollo con hot-reload (proxy al backend en :8000)
+```
+
+## Deploy en la Pi (`deploy/`)
+
+- `chess-backend.service`: systemd con arranque automático y restart.
+- `kiosk.md`: Chromium en modo kiosk apuntando a `/ui`, pantalla siempre
+  encendida y pasos de instalación completos.

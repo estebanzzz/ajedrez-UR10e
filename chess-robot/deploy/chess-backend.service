@@ -1,0 +1,24 @@
+# systemd unit del backend (Raspberry Pi).
+# Instalación:
+#   sudo cp chess-backend.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now chess-backend
+[Unit]
+Description=Chess Robot backend (FastAPI + sensores + UR10e)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/chess-robot/backend
+Environment=CHESS_DRIVER=matrix
+Environment=CHESS_ROBOT_HOST=192.168.1.10
+Environment=CHESS_DIFFICULTY=intermedio
+ExecStart=/home/pi/chess-robot/backend/.venv/bin/python -m app.api.server
+Restart=on-failure
+RestartSec=3
+# Watchdog simple: si el proceso muere, systemd lo relanza; los estados de
+# partida se pierden (aceptable en exposición: se inicia partida nueva).
+
+[Install]
+WantedBy=multi-user.target

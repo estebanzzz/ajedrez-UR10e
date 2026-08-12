@@ -48,6 +48,8 @@ class Engine(Protocol):
 
     def choose_move(self, board: chess.Board) -> chess.Move: ...
 
+    def evaluate(self, board: chess.Board, time_limit: float = 0.3): ...
+
 
 class GameOrchestrator:
     def __init__(
@@ -71,6 +73,7 @@ class GameOrchestrator:
         self._phase = MatchPhase.IDLE
         self._last_error: str | None = None
         self._robot_steps: list[str] = []
+        self._evaluation: dict | None = None
 
     # ------------------------------------------------------------------ estado
 
@@ -89,9 +92,13 @@ class GameOrchestrator:
                 else []
             )
             outcome = self._game.outcome()
+            move_stack = self._game.board.move_stack
             return {
                 "phase": self._phase.value,
                 "fen": self._game.fen,
+                "last_move": move_stack[-1].uci() if move_stack else None,
+                "in_check": self._game.board.is_check(),
+                "evaluation": self._evaluation,
                 "turn": "white" if self._game.turn == chess.WHITE else "black",
                 "human_color": (
                     "white" if self._game.human_color == chess.WHITE else "black"
@@ -126,6 +133,8 @@ class GameOrchestrator:
             self._robot.reset_trays()
             self._last_error = None
             self._robot_steps = []
+            self._evaluation = None
+            self._update_evaluation()
             if human_color == chess.WHITE:
                 self._enter_human_turn()
             else:
@@ -151,6 +160,7 @@ class GameOrchestrator:
             assert isinstance(result, DetectionResult)
             self._game.apply_move(result.move)
             self._last_error = None
+            self._update_evaluation()
 
             if self._game.outcome() is not None:
                 self._phase = MatchPhase.GAME_OVER
@@ -178,6 +188,19 @@ class GameOrchestrator:
 
     # ---------------------------------------------------------------- interno
 
+    def _update_evaluation(self) -> None:
+        """Evaluación para la barra de la UI; nunca debe frenar la partida."""
+        try:
+            evaluation = self._engine.evaluate(self._game.board)
+        except Exception:
+            logger.exception("Fallo al evaluar la posición")
+            return
+        self._evaluation = {
+            "cp": evaluation.centipawns,
+            "mate": evaluation.mate_in,
+            "display": str(evaluation),
+        }
+
     def _enter_human_turn(self) -> None:
         self._phase = MatchPhase.HUMAN_TURN
         self._bridge.start_turn()
@@ -191,6 +214,7 @@ class GameOrchestrator:
             logger.info("Robot juega %s", move.uci())
             self._robot_steps = self._robot.execute_move(board_before, move)
             self._game.apply_move(move)
+            self._update_evaluation()
             expected = self._game.expected_bitmap
             if self._on_robot_moved is not None:
                 self._on_robot_moved(expected)

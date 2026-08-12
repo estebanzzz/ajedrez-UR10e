@@ -40,6 +40,11 @@ class ScriptedEngine:
     def choose_move(self, board: chess.Board) -> chess.Move:
         return self._moves.pop(0)
 
+    def evaluate(self, board: chess.Board, time_limit: float = 0.3):
+        from app.engine import Evaluation
+
+        return Evaluation(centipawns=0, mate_in=None)
+
 
 class Rig:
     """Banco de pruebas: orquestador completo sobre mundo simulado."""

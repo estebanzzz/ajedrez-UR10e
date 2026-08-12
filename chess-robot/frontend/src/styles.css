@@ -1,0 +1,101 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #14141a;
+  --panel: #1f1f28;
+  --text: #ececf1;
+  --muted: #9a9aa8;
+  --light-sq: #e8dcc5;
+  --dark-sq: #7b8b64;
+  --accent: #4f9cf9;
+}
+
+html, body, #root { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  user-select: none;
+}
+
+.app { display: flex; flex-direction: column; height: 100%; padding: 1rem 1.5rem; gap: .8rem; }
+
+header { display: flex; align-items: baseline; gap: 1rem; }
+header h1 { font-size: 1.4rem; cursor: default; }
+.disconnected { color: #e66; font-size: .85rem; }
+
+.banner {
+  text-align: center; font-size: 1.6rem; font-weight: 600;
+  padding: .6rem; border-radius: .6rem; background: var(--panel);
+}
+.banner.human { color: #7fd47f; }
+.banner.robot { color: var(--accent); }
+.banner.error { color: #f2a33c; }
+.banner.active { color: #e8d44d; }
+
+main { display: flex; flex: 1; gap: 1.2rem; min-height: 0; justify-content: center; }
+
+/* ------------------------------------------------------------------ tablero */
+.board {
+  display: grid; aspect-ratio: 1; height: 100%; max-height: 78vh;
+  grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr);
+  border: 4px solid #3a3a46; border-radius: 4px;
+}
+.square { display: flex; align-items: center; justify-content: center; position: relative; }
+.square.light { background: var(--light-sq); }
+.square.dark { background: var(--dark-sq); }
+.square.last-move::after {
+  content: ''; position: absolute; inset: 0; background: rgba(232, 212, 77, .35);
+}
+.square.conflict::after {
+  content: ''; position: absolute; inset: 0; background: rgba(242, 90, 60, .45);
+}
+.piece { font-size: min(8.5vh, 8.5vw); line-height: 1; z-index: 1; }
+.piece.white { color: #fafafa; text-shadow: 0 0 3px #333; }
+.piece.black { color: #1b1b1b; text-shadow: 0 0 3px #999; }
+
+/* ---------------------------------------------------------- barra evaluación */
+.eval-bar {
+  width: 2rem; max-height: 78vh; background: #fafafa; border-radius: 4px;
+  position: relative; overflow: hidden; border: 2px solid #3a3a46;
+}
+.eval-black { background: #222; transition: height .6s ease; }
+.eval-label {
+  position: absolute; bottom: .3rem; left: 0; right: 0; text-align: center;
+  font-size: .7rem; color: #666; font-weight: 700;
+}
+
+/* ------------------------------------------------------------------- lateral */
+aside { display: flex; flex-direction: column; gap: 1rem; width: 15rem; }
+aside section { background: var(--panel); border-radius: .6rem; padding: .8rem; }
+aside h3 { font-size: .85rem; color: var(--muted); text-transform: uppercase; margin-bottom: .5rem; }
+
+.difficulty { display: flex; flex-direction: column; gap: .4rem; }
+.difficulty button, .operator-panel button {
+  background: #2c2c38; border: 1px solid #3a3a46; color: var(--text);
+  padding: .55rem .8rem; border-radius: .45rem; font-size: 1rem; cursor: pointer;
+}
+.difficulty button.selected { background: var(--accent); border-color: var(--accent); color: #101018; font-weight: 700; }
+
+.history { max-height: 40vh; overflow-y: auto; }
+.history table { width: 100%; border-collapse: collapse; font-size: 1.05rem; }
+.history td { padding: .15rem .4rem; }
+.move-number { color: var(--muted); width: 2.2rem; }
+
+/* ---------------------------------------------------------- panel operador */
+.operator-panel {
+  position: fixed; inset: 2rem; background: var(--panel); border-radius: 1rem;
+  padding: 1.2rem; z-index: 10; overflow: auto; border: 1px solid #3a3a46;
+  box-shadow: 0 10px 40px rgba(0,0,0,.6);
+}
+.operator-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.operator-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1.2rem; }
+.operator-grid section { display: flex; flex-direction: column; gap: .5rem; }
+.sensor-map {
+  display: grid; grid-template-columns: repeat(8, 1.4rem); grid-auto-rows: 1.4rem; gap: 2px;
+}
+.mini-square { background: #2c2c38; border-radius: 2px; }
+.mini-square.on { background: #e33; }
+.conflict-list { color: #f2a33c; font-size: .85rem; }
+.status-dump { font-size: .7rem; color: var(--muted); max-height: 18rem; overflow: auto; }

@@ -26,6 +26,7 @@ from pathlib import Path
 import chess
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from app.board_sensor import BoardScanner, MockDriver
@@ -40,6 +41,7 @@ from app.robot_controller import RobotController, SimulatedRobot
 WS_POLL_INTERVAL = 0.05  # 20 Hz, igual que la spec de escaneo
 
 CONFIG_DIR = Path(__file__).resolve().parents[2] / "config"
+FRONTEND_DIST = Path(__file__).resolve().parents[3] / "frontend" / "dist"
 
 
 def _build_driver(name: str):
@@ -218,6 +220,11 @@ def create_app(driver_name: str | None = None) -> FastAPI:
                 await asyncio.sleep(WS_POLL_INTERVAL)
         except WebSocketDisconnect:
             pass
+
+    # -------------------------------------------------- UI de exposición (/ui)
+
+    if FRONTEND_DIST.is_dir():
+        app.mount("/ui", StaticFiles(directory=FRONTEND_DIST, html=True), name="ui")
 
     return app
 
