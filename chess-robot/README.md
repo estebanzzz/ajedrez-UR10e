@@ -8,7 +8,9 @@ Especificación completa en [PROYECTO_ROBOT_AJEDREZ.md](../PROYECTO_ROBOT_AJEDRE
 
 - ✅ **Fase 1 — Núcleo de juego (sin hardware)**: `game_state`, `move_detector`,
   `engine`, simulador de tablero por consola y tests.
-- ⬜ Fase 2 — Tablero sensorizado (driver gpiod/MCP23017)
+- ✅ **Fase 2 — Tablero sensorizado**: drivers (MCP23017 / matriz GPIO / mock),
+  debounce, scanner, WebSocket y diagnóstico visual. Falta solo validar con el
+  hardware real cuando exista.
 - ⬜ Fase 3 — Robot y garra (ur_rtde, calibración, pick & place)
 - ⬜ Fase 4 — Integración completa
 - ⬜ Fase 5 — UI de exposición (React kiosk)
@@ -63,3 +65,25 @@ cd backend
 - **Motor** (`app/engine`): Stockfish UCI con presets de dificultad
   (`principiante`/`intermedio`/`avanzado`/`maximo` vía `UCI_Elo`) y evaluación
   continua para la barra de la UI. `RandomEngine` como respaldo de desarrollo.
+
+## Backend — Fase 2 (tablero sensorizado)
+
+- **Drivers** (`app/board_sensor/`): `MCP23017Driver` (4 chips I2C, activo en
+  bajo, bus inyectable → testeable sin hardware), `MatrixGPIODriver`
+  (alternativa libgpiod v2, pendiente de validar) y `MockDriver` para
+  desarrollo.
+- **`Debouncer` + `BoardScanner`**: barrido a 30 Hz en hilo propio, bitmap
+  estable tras N lecturas idénticas, suscriptores y contador de errores I2C.
+- **`SensorDetectorBridge`** (`app/move_detector/bridge.py`): conecta el
+  scanner con el `MoveDetector` durante el turno humano — el mismo camino
+  sirve para mock y hardware real.
+- **API** (`app/api/server.py`): `GET /api/status`, WebSocket `/ws/sensors`
+  (~20 Hz, solo cambios) y página de **diagnóstico visual** en `/` con el mapa
+  de ocupación en vivo (en modo mock, click para simular piezas).
+
+```bash
+cd backend
+.venv/Scripts/python -m app.api.server    # abre http://localhost:8000
+# En la Pi con hardware: CHESS_DRIVER=mcp23017 python -m app.api.server
+# Dependencias de la Pi: pip install -r requirements-pi.txt
+```
