@@ -1,0 +1,114 @@
+{
+  "board": {
+    "a1": {
+      "x": 0.4,
+      "y": -0.175,
+      "z": 0.02
+    },
+    "a8": {
+      "x": 0.4,
+      "y": 0.175,
+      "z": 0.02
+    },
+    "h1": {
+      "x": 0.75,
+      "y": -0.175,
+      "z": 0.02
+    },
+    "h8": {
+      "x": 0.75,
+      "y": 0.175,
+      "z": 0.02
+    }
+  },
+  "capture_tray": {
+    "col_step": {
+      "x": 0.05,
+      "y": 0,
+      "z": 0
+    },
+    "cols": 4,
+    "origin": {
+      "x": 0.9,
+      "y": -0.3,
+      "z": 0.02
+    },
+    "row_step": {
+      "x": 0,
+      "y": 0.05,
+      "z": 0
+    },
+    "rows": 8
+  },
+  "motion": {
+    "acceleration": 0.4,
+    "approach_clearance_m": 0.06,
+    "speed_travel": 0.25,
+    "speed_vertical": 0.08,
+    "transit_clearance_m": 0.04
+  },
+  "piece_params": {
+    "bishop": {
+      "approach_opening_mm": 55.0,
+      "grip_force": 0.25,
+      "grip_height_m": 0.028,
+      "grip_opening_mm": 30.0,
+      "height_m": 0.065
+    },
+    "king": {
+      "approach_opening_mm": 60.0,
+      "grip_force": 0.3,
+      "grip_height_m": 0.035,
+      "grip_opening_mm": 34.0,
+      "height_m": 0.095
+    },
+    "knight": {
+      "approach_opening_mm": 55.0,
+      "grip_force": 0.25,
+      "grip_height_m": 0.025,
+      "grip_opening_mm": 32.0,
+      "height_m": 0.055
+    },
+    "pawn": {
+      "approach_opening_mm": 50.0,
+      "grip_force": 0.25,
+      "grip_height_m": 0.02,
+      "grip_opening_mm": 28.0,
+      "height_m": 0.045
+    },
+    "queen": {
+      "approach_opening_mm": 60.0,
+      "grip_force": 0.3,
+      "grip_height_m": 0.032,
+      "grip_opening_mm": 34.0,
+      "height_m": 0.08
+    },
+    "rook": {
+      "approach_opening_mm": 55.0,
+      "grip_force": 0.25,
+      "grip_height_m": 0.025,
+      "grip_opening_mm": 34.0,
+      "height_m": 0.055
+    }
+  },
+  "reserve_tray": {
+    "col_step": {
+      "x": 0.05,
+      "y": 0,
+      "z": 0
+    },
+    "cols": 2,
+    "origin": {
+      "x": 0.9,
+      "y": 0.3,
+      "z": 0.02
+    },
+    "row_step": {
+      "x": 0,
+      "y": 0.05,
+      "z": 0
+    },
+    "rows": 1
+  },
+  "robot_host": "192.168.1.10"
+}

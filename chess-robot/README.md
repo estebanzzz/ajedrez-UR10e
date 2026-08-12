@@ -11,7 +11,9 @@ Especificación completa en [PROYECTO_ROBOT_AJEDREZ.md](../PROYECTO_ROBOT_AJEDRE
 - ✅ **Fase 2 — Tablero sensorizado**: driver de matriz por GPIO directo
   (+ mock de desarrollo), debounce, scanner, WebSocket y diagnóstico visual.
   Falta solo validar con el hardware real cuando exista.
-- ⬜ Fase 3 — Robot y garra (ur_rtde, calibración, pick & place)
+- 🔶 **Fase 3 — Robot y garra**: geometría de calibración, traducción de
+  jugadas a pick & place, bandejas y robot simulado listos; pendiente lo que
+  requiere hardware (validar `URRtdeRobot`, teach de esquinas, garra real).
 - ⬜ Fase 4 — Integración completa
 - ⬜ Fase 5 — UI de exposición (React kiosk)
 
@@ -89,3 +91,21 @@ cd backend
 # En la Pi con hardware: CHESS_DRIVER=matrix python -m app.api.server
 # Dependencias de la Pi: pip install -r requirements-pi.txt
 ```
+
+## Backend — Fase 3 (robot y garra)
+
+- **Geometría** (`app/robot_controller/geometry.py`): teach de los centros de
+  las 4 esquinas (a1/h1/a8/h8) → las 64 posiciones por interpolación bilineal
+  (absorbe inclinación y rotación del tablero). Bandejas en grilla
+  (`TrayGrid`) para capturas y reserva de promoción.
+- **`RobotController`** (`controller.py`): traduce jugadas UCI a secuencias
+  pick & place — aproximación → descenso → garra → altura de tránsito (sobre
+  el rey) → traslado. Capturas primero a la bandeja, enroque rey+torre,
+  promoción con dama de la reserva. Velocidades reducidas por defecto.
+- **`RobotInterface`** (`robot.py`): `SimulatedRobot` (tests/desarrollo) y
+  `URRtdeRobot` (ur_rtde real + garra Robotiq por registros del URCap,
+  pendiente de validar con el UR10e).
+- **Calibración** (`app/calibration/store.py`): persistencia JSON de esquinas,
+  bandejas, parámetros por pieza y velocidades —
+  ver `config/calibration.example.json`. La rutina asistida de teach
+  (freedrive/jog) se completa con el robot real.
