@@ -47,11 +47,20 @@ FRONTEND_DIST = Path(__file__).resolve().parents[3] / "frontend" / "dist"
 def _build_driver(name: str):
     if name == "mock":
         return MockDriver(initial=FULL_START_BITMAP)
+    if name == "s7":
+        from app.board_sensor.s7 import open_s7
+
+        return open_s7(
+            host=os.environ.get("CHESS_PLC_HOST", "192.168.0.20"),
+            rack=int(os.environ.get("CHESS_PLC_RACK", "0")),
+            slot=int(os.environ.get("CHESS_PLC_SLOT", "1")),
+            db_number=int(os.environ.get("CHESS_PLC_DB", "1")),
+        )
     if name == "matrix":
         from app.board_sensor.matrix_gpio import GpiodBackend, MatrixGPIODriver
 
         return MatrixGPIODriver(GpiodBackend())
-    raise ValueError(f"Driver desconocido: {name!r} (opciones: mock, matrix)")
+    raise ValueError(f"Driver desconocido: {name!r} (opciones: mock, s7, matrix)")
 
 
 def _load_calibration():
@@ -107,10 +116,27 @@ def create_app(driver_name: str | None = None) -> FastAPI:
     ) else None
     orchestrator = GameOrchestrator(game, scanner, engine, controller, on_robot_moved)
 
+    # Con PLC: botón físico de confirmación y baliza según fase de la partida.
+    from app.board_sensor.s7 import PanelLink, S7Driver
+
+    panel_link = (
+        PanelLink(
+            driver,
+            get_phase=lambda: orchestrator.phase.value,
+            on_button=orchestrator.confirm,
+        )
+        if isinstance(driver, S7Driver)
+        else None
+    )
+
     @contextlib.asynccontextmanager
     async def lifespan(_app: FastAPI):
         scanner.start()
+        if panel_link is not None:
+            panel_link.start()
         yield
+        if panel_link is not None:
+            panel_link.stop()
         scanner.stop()
         driver.close()
         engine.close()
@@ -137,12 +163,20 @@ def create_app(driver_name: str | None = None) -> FastAPI:
 
     @app.get("/api/status")
     def status() -> dict:
-        return {
+        result = {
             "driver": driver_name,
             "mock": isinstance(driver, MockDriver),
             "read_errors": scanner.read_errors,
             **_sensor_message(),
         }
+        if isinstance(driver, S7Driver):
+            result["plc"] = {
+                "alive": driver.plc_alive(),
+                "heartbeat": driver.heartbeat,
+                "estop_ok": driver.estop_ok,
+                "button": driver.button_pressed,
+            }
+        return result
 
     @app.post("/api/mock/toggle/{square_name}")
     def mock_toggle(square_name: str) -> dict:

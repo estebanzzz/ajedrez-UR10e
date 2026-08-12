@@ -16,14 +16,22 @@ Sistema demostrativo para exposición en el que un robot colaborativo **Universa
 │  ├── Backend Python (FastAPI + python-chess)        │
 │  ├── Stockfish (motor UCI, nivel ajustable)         │
 │  ├── ur_rtde → UR10e (Ethernet)                     │
-│  ├── Lectura matriz sensores (GPIO / I2C)           │
+│  ├── python-snap7 → S7-1200 (Ethernet, protocolo S7)│
 │  └── Frontend React (kiosk en pantalla HDMI)        │
 └─────────────────────────────────────────────────────┘
-         │ Ethernet                │ GPIO/I2C
-   ┌─────▼─────┐            ┌──────▼──────┐
-   │ UR10e     │            │ Tablero 8x8 │
-   │ + Robotiq │            │ reed/hall   │
-   └───────────┘            └─────────────┘
+         │ Ethernet                │ Ethernet (S7)
+   ┌─────▼─────┐            ┌──────▼──────────────────┐
+   │ UR10e     │            │ PLC S7-1200 (CPU 1215C) │
+   │ + Robotiq │            │  esclavo de E/S:        │
+   └───────────┘            │  ├── matriz 8x8 (DI/DQ) │
+                            │  ├── botón confirmación │
+                            │  └── baliza/semáforo    │
+                            └──────┬──────────────────┘
+                                   │ 24 V DC
+                            ┌──────▼──────┐
+                            │ Tablero 8x8 │
+                            │ reed + diodo│
+                            └─────────────┘
 ```
 
 ### 2.1 Robot
@@ -37,12 +45,13 @@ Sistema demostrativo para exposición en el que un robot colaborativo **Universa
 - Alternativa: Modbus RTU directo al conector de herramienta.
 - Parámetros por tipo de pieza: apertura, fuerza (baja, piezas livianas), velocidad.
 
-### 2.3 Tablero sensorizado
-- Matriz 8×8 de sensores **reed o Hall** (solo presencia, sin identidad de pieza). Cada pieza lleva imán en la base.
-- **Conexión directa a las entradas digitales de la Pi** (sin expansores I2C): 8 líneas de fila (salidas) + 8 de columna (entradas), 16 GPIO en total, con **diodo por sensor** para evitar lecturas fantasma (ghosting).
-- Lectura por barrido de filas/columnas.
-- Frecuencia de escaneo: ≥ 20 Hz con debounce por software (2–3 lecturas estables).
-- Acceso GPIO en Pi 5 mediante `gpiod` (libgpiod v2) — no usar RPi.GPIO (incompatible con Pi 5).
+### 2.3 Tablero sensorizado (vía PLC S7-1200)
+- Matriz 8×8 de sensores **reed** (solo presencia, sin identidad de pieza). Cada pieza lleva imán en la base.
+- **La E/S física la maneja un PLC Siemens S7-1200 (CPU 1215C)** — decisión de exposición: mostrar un PLC en el loop como esclavo de E/S. La matriz se cablea a las DI/DQ onboard (8 salidas de fila + 8 entradas de columna, a 24 V DC), con **diodo por sensor** contra lecturas fantasma.
+- El PLC barre la matriz en un OB cíclico (~5 ms por fila → tablero completo a ~25 Hz) y publica la ocupación en un **DB**; también lee el botón de confirmación y comanda la baliza/semáforo.
+- La Pi lee el DB por Ethernet con **python-snap7** (protocolo S7; requiere PUT/GET habilitado y DB no optimizado). Debounce por software en la Pi (2–3 lecturas estables).
+- Detalle TIA: bajar el filtro de las DI de 6.4 ms a **0.8 ms** para que el barrido funcione. Ver `chess-robot/docs/plc-s7-1200.md`.
+- Alternativa de respaldo (sin PLC): matriz directa a los GPIO de la Pi con `gpiod` (driver `matrix` ya implementado).
 
 ### 2.4 Pantalla
 - Monitor HDMI en modo kiosk (Chromium fullscreen) mostrando la UI React.
@@ -50,8 +59,9 @@ Sistema demostrativo para exposición en el que un robot colaborativo **Universa
 ### 2.5 Elementos físicos adicionales
 - **Bandeja lateral de capturas** con posiciones en grilla (el robot apila ordenadamente).
 - **Bandeja de reserva** para piezas de promoción (mínimo 2 damas extra).
-- **Botón físico de confirmación de jugada** del humano (recomendado; simplifica enormemente la detección de fin de jugada). Alternativa: timeout de estabilidad del tablero.
-- Botón de parada de emergencia accesible (además del e-stop del UR).
+- **Botón físico de confirmación de jugada** del humano, cableado a una DI del PLC (simplifica enormemente la detección de fin de jugada). Alternativa: timeout de estabilidad del tablero.
+- **Baliza/semáforo** comandada por el PLC según el estado de la partida (verde: turno humano; rojo: robot en movimiento; amarillo: error/resync).
+- Botón de parada de emergencia accesible (además del e-stop del UR), con contacto auxiliar leído por el PLC.
 
 ## 3. Arquitectura de software
 
@@ -62,7 +72,8 @@ Sistema demostrativo para exposición en el que un robot colaborativo **Universa
 | Reglas de ajedrez | `python-chess` |
 | Motor | Stockfish (binario ARM64) vía UCI |
 | Robot | `ur_rtde` |
-| GPIO | `gpiod` (libgpiod v2, barrido de matriz) |
+| PLC (E/S tablero) | `python-snap7` → S7-1215C (DB por protocolo S7) |
+| GPIO (respaldo) | `gpiod` (libgpiod v2, barrido de matriz) |
 | Frontend | React + Vite, `react-chessboard`, WebSocket client |
 | Servicio | systemd (arranque automático, watchdog) |
 
@@ -141,7 +152,7 @@ Sistema demostrativo para exposición en el que un robot colaborativo **Universa
 ## 7. Decisiones pendientes
 
 - [ ] Modelo definitivo de garra Robotiq (recomendado Hand-E o 2F-85) y método de control (URCap vs Modbus).
-- [x] Electrónica de lectura de matriz: **barrido con diodos conectado directo a los GPIO de la Pi** (decidido; sin expansores MCP23017).
+- [x] Electrónica de lectura de matriz: **barrido con diodos manejado por un PLC S7-1200 (CPU 1215C)**; la Pi lee la ocupación por Ethernet (snap7). El barrido directo por GPIO de la Pi queda implementado como respaldo.
 - [ ] Botón físico de confirmación de jugada vs timeout de estabilidad (recomendado botón).
 - [ ] Dimensiones del tablero y de las piezas (define aperturas de garra y alturas).
 - [ ] Reloj de partida / límite de tiempo para el humano (opcional para la expo).

@@ -1,3 +1,4 @@
 # Dependencias que solo aplican en la Raspberry Pi (hardware real)
 -r requirements.txt
-gpiod>=2.1       # libgpiod v2: barrido de la matriz por GPIO
+python-snap7>=1.4   # PLC S7-1200: lectura del tablero vía DB (driver s7)
+gpiod>=2.1          # libgpiod v2: barrido de matriz por GPIO (respaldo)

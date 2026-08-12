@@ -76,12 +76,15 @@ cd backend
 
 ## Backend — Fase 2 (tablero sensorizado)
 
-- **Driver de matriz** (`app/board_sensor/matrix_gpio.py`): la matriz 8x8 va
-  **conectada directo a los GPIO de la Pi** — 8 filas (salidas) + 8 columnas
-  (entradas con pull-down), diodo por sensor contra ghosting. La lógica de
-  barrido está separada del acceso físico (`MatrixBackend`), así se testea sin
-  hardware; `GpiodBackend` (libgpiod v2) es el acceso real en la Pi.
-  `MockDriver` para desarrollo.
+- **Driver S7 / PLC** (`app/board_sensor/s7.py`) — **el driver de producción**:
+  un S7-1200 (CPU 1215C) barre la matriz, lee el botón de confirmación y
+  comanda la baliza; la Pi lee el DB por Ethernet con python-snap7
+  (`CHESS_DRIVER=s7`, `CHESS_PLC_HOST=<ip>`). Incluye heartbeat de vida del
+  PLC y `PanelLink` (botón físico → confirmación; fase de partida → baliza).
+  Lado TIA Portal documentado en `docs/plc-s7-1200.md` (DB, SCL, cableado).
+- **Driver de matriz GPIO** (`app/board_sensor/matrix_gpio.py`) — respaldo
+  sin PLC: matriz directa a los GPIO de la Pi (8 filas + 8 columnas, diodo
+  por sensor), acceso real con libgpiod v2. `MockDriver` para desarrollo.
 - **`Debouncer` + `BoardScanner`**: barrido a 30 Hz en hilo propio, bitmap
   estable tras N lecturas idénticas, suscriptores y contador de errores I2C.
 - **`SensorDetectorBridge`** (`app/move_detector/bridge.py`): conecta el
