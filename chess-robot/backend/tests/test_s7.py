@@ -8,25 +8,26 @@ from app.board_sensor.s7 import (
     S7Driver,
     STATUS_ERROR,
     STATUS_HUMAN_TURN,
-    STATUS_OFFSET,
+    STATUS_OFFSET_OWN_DB,
+    STATUS_OFFSET_SHARED_DB,
     STATUS_ROBOT_MOVING,
 )
 
 
 class FakeS7Client:
-    """Simula el DB del PLC: 14 bytes según el layout documentado."""
+    """Simula los DBs del PLC según el layout documentado."""
 
     def __init__(self) -> None:
-        self.db = bytearray(14)
-        self.writes: list[tuple[int, bytes]] = []
+        self.dbs: dict[int, bytearray] = {1: bytearray(14), 2: bytearray(2)}
+        self.writes: list[tuple[int, int, bytes]] = []  # (db, offset, datos)
         self.disconnected = False
 
     def db_read(self, db_number: int, start: int, size: int) -> bytearray:
-        return bytearray(self.db[start : start + size])
+        return bytearray(self.dbs[db_number][start : start + size])
 
     def db_write(self, db_number: int, start: int, data: bytearray) -> None:
-        self.db[start : start + len(data)] = data
-        self.writes.append((start, bytes(data)))
+        self.dbs[db_number][start : start + len(data)] = data
+        self.writes.append((db_number, start, bytes(data)))
 
     def disconnect(self) -> None:
         self.disconnected = True
@@ -36,13 +37,13 @@ class FakeS7Client:
         bitmap = 0
         for square in squares:
             bitmap |= 1 << square
-        self.db[0:8] = bitmap.to_bytes(8, "little")
+        self.dbs[1][0:8] = bitmap.to_bytes(8, "little")
 
     def set_panel(self, button: bool = False, estop_ok: bool = True) -> None:
-        self.db[8] = (0x01 if button else 0) | (0x02 if estop_ok else 0)
+        self.dbs[1][8] = (0x01 if button else 0) | (0x02 if estop_ok else 0)
 
     def set_heartbeat(self, value: int) -> None:
-        self.db[10:12] = value.to_bytes(2, "big")
+        self.dbs[1][10:12] = value.to_bytes(2, "big")
 
 
 def make_driver() -> tuple[S7Driver, FakeS7Client]:
@@ -68,7 +69,7 @@ def test_square_mapping_matches_convention():
 def test_starting_position_roundtrip():
     driver, client = make_driver()
     occupied = chess.Board().occupied
-    client.db[0:8] = occupied.to_bytes(8, "little")
+    client.dbs[1][0:8] = occupied.to_bytes(8, "little")
     assert driver.read() == occupied
 
 
@@ -95,12 +96,20 @@ def test_plc_alive_tracks_heartbeat_changes():
     assert driver.plc_alive(max_age_s=1.0)
 
 
-def test_write_status_and_close():
+def test_write_status_goes_to_output_db():
+    # Esquema por defecto: DB1 entradas (PLC→Pi), DB2 salidas (Pi→PLC).
     driver, client = make_driver()
     driver.write_status(STATUS_ROBOT_MOVING)
-    assert client.writes == [(STATUS_OFFSET, bytes([STATUS_ROBOT_MOVING]))]
+    assert client.writes == [(2, STATUS_OFFSET_OWN_DB, bytes([STATUS_ROBOT_MOVING]))]
     driver.close()
     assert client.disconnected
+
+
+def test_single_shared_db_uses_offset_12():
+    client = FakeS7Client()
+    driver = S7Driver(client, db_in=1, db_out=1)
+    driver.write_status(STATUS_ROBOT_MOVING)
+    assert client.writes == [(1, STATUS_OFFSET_SHARED_DB, bytes([STATUS_ROBOT_MOVING]))]
 
 
 # ---------------------------------------------------------------- PanelLink
@@ -132,11 +141,11 @@ def test_status_written_only_on_phase_change():
 
     link.poll_once()
     link.poll_once()
-    assert [w for w in client.writes] == [(STATUS_OFFSET, bytes([STATUS_HUMAN_TURN]))]
+    assert client.writes == [(2, STATUS_OFFSET_OWN_DB, bytes([STATUS_HUMAN_TURN]))]
 
     phase["value"] = "resync"
     link.poll_once()
-    assert client.writes[-1] == (STATUS_OFFSET, bytes([STATUS_ERROR]))
+    assert client.writes[-1] == (2, STATUS_OFFSET_OWN_DB, bytes([STATUS_ERROR]))
 
 
 def test_all_phases_have_status_code():

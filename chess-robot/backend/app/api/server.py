@@ -54,7 +54,8 @@ def _build_driver(name: str):
             host=os.environ.get("CHESS_PLC_HOST", "192.168.0.20"),
             rack=int(os.environ.get("CHESS_PLC_RACK", "0")),
             slot=int(os.environ.get("CHESS_PLC_SLOT", "1")),
-            db_number=int(os.environ.get("CHESS_PLC_DB", "1")),
+            db_in=int(os.environ.get("CHESS_PLC_DB_IN", "1")),
+            db_out=int(os.environ.get("CHESS_PLC_DB_OUT", "2")),
         )
     if name == "matrix":
         from app.board_sensor.matrix_gpio import GpiodBackend, MatrixGPIODriver

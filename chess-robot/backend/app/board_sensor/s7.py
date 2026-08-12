@@ -1,15 +1,21 @@
 """Driver del tablero vía PLC Siemens S7-1200 (CPU 1215C).
 
 El PLC barre la matriz 8x8, lee el botón de confirmación y comanda la
-baliza; publica todo en un DB que la Pi lee por Ethernet con python-snap7.
-Layout del DB (no optimizado — ver chess-robot/docs/plc-s7-1200.md):
+baliza; publica todo en DBs que la Pi accede por Ethernet con python-snap7.
+Dos DBs, cada lado escribe solo el suyo (no optimizados — ver
+chess-robot/docs/plc-s7-1200.md):
 
+DB de entradas (PLC → Pi, default DB1):
     DBB0..7   ocupación: byte n = fila n+1; bit m = columna (a=0 … h=7)
     DBB8      panel: bit 0 = botón confirmar, bit 1 = e-stop OK
     DBB9      reservado
     DBW10     heartbeat (el PLC lo incrementa en cada barrido completo)
-    DBB12     status (lo escribe la Pi → semáforo/baliza)
-    DBB13     reservado
+
+DB de salidas (Pi → PLC, default DB2):
+    DBB0      status → semáforo/baliza (códigos STATUS_*)
+
+También se puede usar un único DB para ambos sentidos (``db_out`` igual a
+``db_in``): en ese caso el status se escribe en el offset 12.
 
 Cada ``read()`` trae los 12 bytes PLC→Pi en una sola transacción (~2-5 ms),
 así el botón y el heartbeat viajan gratis con la ocupación.
@@ -30,7 +36,8 @@ from app.board_sensor.bitmap import Bitmap
 logger = logging.getLogger(__name__)
 
 READ_SIZE = 12  # DBB0..11 (ocupación + panel + heartbeat)
-STATUS_OFFSET = 12
+STATUS_OFFSET_SHARED_DB = 12  # un solo DB: el status va después de las entradas
+STATUS_OFFSET_OWN_DB = 0  # DB de salidas propio: el status arranca en 0
 
 # Códigos de status Pi→PLC (DBB12) — el PLC los traduce a la baliza.
 STATUS_IDLE = 0
@@ -51,9 +58,21 @@ class S7Client(Protocol):
 
 
 class S7Driver:
-    def __init__(self, client: S7Client, db_number: int = 1) -> None:
+    def __init__(
+        self,
+        client: S7Client,
+        db_in: int = 1,
+        db_out: int | None = 2,
+    ) -> None:
+        """``db_in``: DB que escribe el PLC (tablero/panel/heartbeat).
+        ``db_out``: DB que escribe la Pi (baliza). Si es None o igual a
+        ``db_in``, se usa el mismo DB con el status en el offset 12."""
         self._client = client
-        self._db = db_number
+        self._db_in = db_in
+        self._db_out = db_out if db_out is not None else db_in
+        self._status_offset = (
+            STATUS_OFFSET_SHARED_DB if self._db_out == db_in else STATUS_OFFSET_OWN_DB
+        )
         self._lock = threading.Lock()
         self._button = False
         self._estop_ok = True
@@ -63,7 +82,7 @@ class S7Driver:
     # ------------------------------------------------- SensorDriver (scanner)
 
     def read(self) -> Bitmap:
-        data = bytes(self._client.db_read(self._db, 0, READ_SIZE))
+        data = bytes(self._client.db_read(self._db_in, 0, READ_SIZE))
         heartbeat = int.from_bytes(data[10:12], "big")  # WORD Siemens: big-endian
         with self._lock:
             self._button = bool(data[8] & 0x01)
@@ -104,16 +123,22 @@ class S7Driver:
     # ------------------------------------------------------------- Pi → PLC
 
     def write_status(self, code: int) -> None:
-        self._client.db_write(self._db, STATUS_OFFSET, bytearray([code & 0xFF]))
+        self._client.db_write(self._db_out, self._status_offset, bytearray([code & 0xFF]))
 
 
-def open_s7(host: str, rack: int = 0, slot: int = 1, db_number: int = 1) -> S7Driver:
+def open_s7(
+    host: str,
+    rack: int = 0,
+    slot: int = 1,
+    db_in: int = 1,
+    db_out: int | None = 2,
+) -> S7Driver:
     """Conecta al PLC real (import diferido: python-snap7 solo en la Pi)."""
     import snap7
 
     client = snap7.client.Client()
     client.connect(host, rack, slot)
-    return S7Driver(client, db_number=db_number)
+    return S7Driver(client, db_in=db_in, db_out=db_out)
 
 
 # --------------------------------------------------------------------- panel
