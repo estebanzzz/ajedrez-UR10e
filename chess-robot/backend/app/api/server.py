@@ -62,6 +62,8 @@ def _load_calibration():
 
 
 def _build_engine(difficulty: str):
+    if os.environ.get("CHESS_ENGINE") == "random":
+        return RandomEngine()
     stockfish_path = find_stockfish()
     if stockfish_path:
         return StockfishEngine(stockfish_path, difficulty=difficulty)

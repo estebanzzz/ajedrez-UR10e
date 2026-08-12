@@ -8,6 +8,11 @@ from app.board_sensor.bitmap import FULL_START_BITMAP
 
 
 def make_client() -> TestClient:
+    # Motor aleatorio: los tests no deben depender de Stockfish ni lanzar
+    # procesos pesados (en la Pi, varios Stockfish agotan la RAM).
+    import os
+
+    os.environ["CHESS_ENGINE"] = "random"
     return TestClient(create_app(driver_name="mock"))
 
 
