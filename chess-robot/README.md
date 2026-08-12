@@ -8,9 +8,9 @@ Especificación completa en [PROYECTO_ROBOT_AJEDREZ.md](../PROYECTO_ROBOT_AJEDRE
 
 - ✅ **Fase 1 — Núcleo de juego (sin hardware)**: `game_state`, `move_detector`,
   `engine`, simulador de tablero por consola y tests.
-- ✅ **Fase 2 — Tablero sensorizado**: drivers (MCP23017 / matriz GPIO / mock),
-  debounce, scanner, WebSocket y diagnóstico visual. Falta solo validar con el
-  hardware real cuando exista.
+- ✅ **Fase 2 — Tablero sensorizado**: driver de matriz por GPIO directo
+  (+ mock de desarrollo), debounce, scanner, WebSocket y diagnóstico visual.
+  Falta solo validar con el hardware real cuando exista.
 - ⬜ Fase 3 — Robot y garra (ur_rtde, calibración, pick & place)
 - ⬜ Fase 4 — Integración completa
 - ⬜ Fase 5 — UI de exposición (React kiosk)
@@ -68,10 +68,12 @@ cd backend
 
 ## Backend — Fase 2 (tablero sensorizado)
 
-- **Drivers** (`app/board_sensor/`): `MCP23017Driver` (4 chips I2C, activo en
-  bajo, bus inyectable → testeable sin hardware), `MatrixGPIODriver`
-  (alternativa libgpiod v2, pendiente de validar) y `MockDriver` para
-  desarrollo.
+- **Driver de matriz** (`app/board_sensor/matrix_gpio.py`): la matriz 8x8 va
+  **conectada directo a los GPIO de la Pi** — 8 filas (salidas) + 8 columnas
+  (entradas con pull-down), diodo por sensor contra ghosting. La lógica de
+  barrido está separada del acceso físico (`MatrixBackend`), así se testea sin
+  hardware; `GpiodBackend` (libgpiod v2) es el acceso real en la Pi.
+  `MockDriver` para desarrollo.
 - **`Debouncer` + `BoardScanner`**: barrido a 30 Hz en hilo propio, bitmap
   estable tras N lecturas idénticas, suscriptores y contador de errores I2C.
 - **`SensorDetectorBridge`** (`app/move_detector/bridge.py`): conecta el
@@ -84,6 +86,6 @@ cd backend
 ```bash
 cd backend
 .venv/Scripts/python -m app.api.server    # abre http://localhost:8000
-# En la Pi con hardware: CHESS_DRIVER=mcp23017 python -m app.api.server
+# En la Pi con hardware: CHESS_DRIVER=matrix python -m app.api.server
 # Dependencias de la Pi: pip install -r requirements-pi.txt
 ```

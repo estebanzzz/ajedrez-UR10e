@@ -4,9 +4,9 @@ Uso en desarrollo (driver mock, simular piezas desde la página de diagnóstico)
 
     python -m app.api.server
 
-En la Pi con hardware real:
+En la Pi con hardware real (matriz en los GPIO):
 
-    CHESS_DRIVER=mcp23017 python -m app.api.server
+    CHESS_DRIVER=matrix python -m app.api.server
 
 Los WebSocket sondean ``scanner.latest`` (~20 Hz): el scanner corre en su
 propio hilo y este es el puente más simple y robusto hacia asyncio.
@@ -32,11 +32,11 @@ WS_POLL_INTERVAL = 0.05  # 20 Hz, igual que la spec de escaneo
 def _build_driver(name: str):
     if name == "mock":
         return MockDriver(initial=FULL_START_BITMAP)
-    if name == "mcp23017":
-        from app.board_sensor.mcp23017 import MCP23017Driver, open_smbus
+    if name == "matrix":
+        from app.board_sensor.matrix_gpio import GpiodBackend, MatrixGPIODriver
 
-        return MCP23017Driver(open_smbus())
-    raise ValueError(f"Driver desconocido: {name!r} (opciones: mock, mcp23017)")
+        return MatrixGPIODriver(GpiodBackend())
+    raise ValueError(f"Driver desconocido: {name!r} (opciones: mock, matrix)")
 
 
 def create_app(driver_name: str | None = None) -> FastAPI:

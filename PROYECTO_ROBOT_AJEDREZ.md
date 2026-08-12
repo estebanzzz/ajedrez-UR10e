@@ -39,6 +39,7 @@ Sistema demostrativo para exposición en el que un robot colaborativo **Universa
 
 ### 2.3 Tablero sensorizado
 - Matriz 8×8 de sensores **reed o Hall** (solo presencia, sin identidad de pieza). Cada pieza lleva imán en la base.
+- **Conexión directa a las entradas digitales de la Pi** (sin expansores I2C): 8 líneas de fila (salidas) + 8 de columna (entradas), 16 GPIO en total, con **diodo por sensor** para evitar lecturas fantasma (ghosting).
 - Lectura por barrido de filas/columnas.
 - Frecuencia de escaneo: ≥ 20 Hz con debounce por software (2–3 lecturas estables).
 - Acceso GPIO en Pi 5 mediante `gpiod` (libgpiod v2) — no usar RPi.GPIO (incompatible con Pi 5).
@@ -61,7 +62,7 @@ Sistema demostrativo para exposición en el que un robot colaborativo **Universa
 | Reglas de ajedrez | `python-chess` |
 | Motor | Stockfish (binario ARM64) vía UCI |
 | Robot | `ur_rtde` |
-| GPIO | `gpiod` / `smbus2` (si MCP23017) |
+| GPIO | `gpiod` (libgpiod v2, barrido de matriz) |
 | Frontend | React + Vite, `react-chessboard`, WebSocket client |
 | Servicio | systemd (arranque automático, watchdog) |
 
@@ -120,7 +121,7 @@ Sistema demostrativo para exposición en el que un robot colaborativo **Universa
 - Tests: detección de jugadas a partir de diffs de bitmap (incluyendo capturas, enroque, en passant, promoción).
 
 ### Fase 2 — Tablero sensorizado
-- Driver de matriz (gpiod/MCP23017), debounce, publicación por WebSocket.
+- Driver de matriz (barrido gpiod), debounce, publicación por WebSocket.
 - Herramienta de diagnóstico visual de sensores.
 - Integrar `move_detector` con hardware real.
 
@@ -140,7 +141,7 @@ Sistema demostrativo para exposición en el que un robot colaborativo **Universa
 ## 7. Decisiones pendientes
 
 - [ ] Modelo definitivo de garra Robotiq (recomendado Hand-E o 2F-85) y método de control (URCap vs Modbus).
-- [ ] Electrónica de lectura de matriz: barrido con diodos vs 4× MCP23017 (recomendado MCP23017 por simplicidad de cableado).
+- [x] Electrónica de lectura de matriz: **barrido con diodos conectado directo a los GPIO de la Pi** (decidido; sin expansores MCP23017).
 - [ ] Botón físico de confirmación de jugada vs timeout de estabilidad (recomendado botón).
 - [ ] Dimensiones del tablero y de las piezas (define aperturas de garra y alturas).
 - [ ] Reloj de partida / límite de tiempo para el humano (opcional para la expo).
