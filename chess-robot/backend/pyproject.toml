@@ -1,0 +1,10 @@
+[project]
+name = "chess-robot-backend"
+version = "0.1.0"
+description = "Backend del robot ajedrecista UR10e — Fase 1: núcleo de juego sin hardware"
+requires-python = ">=3.11"
+dependencies = ["chess>=1.10"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

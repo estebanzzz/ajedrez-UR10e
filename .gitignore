@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+*.egg-info/
+
+# Node (frontend, Fase 5)
+node_modules/
+dist/
+
+# Config local / calibración de cada instalación
+chess-robot/backend/config/local_*
