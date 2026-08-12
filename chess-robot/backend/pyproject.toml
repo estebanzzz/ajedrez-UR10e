@@ -8,3 +8,6 @@ dependencies = ["chess>=1.10"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+markers = [
+    "rig_args: argumentos del banco de pruebas del orquestador",
+]

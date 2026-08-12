@@ -202,3 +202,8 @@ class RobotController:
     @property
     def reserve_used(self) -> int:
         return self._reserve.used
+
+    def reset_trays(self) -> None:
+        """Partida nueva: el operador vació las bandejas y repuso la reserva."""
+        self._captures.used = 0
+        self._reserve.used = 0

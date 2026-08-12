@@ -14,7 +14,10 @@ Especificación completa en [PROYECTO_ROBOT_AJEDREZ.md](../PROYECTO_ROBOT_AJEDRE
 - 🔶 **Fase 3 — Robot y garra**: geometría de calibración, traducción de
   jugadas a pick & place, bandejas y robot simulado listos; pendiente lo que
   requiere hardware (validar `URRtdeRobot`, teach de esquinas, garra real).
-- ⬜ Fase 4 — Integración completa
+- 🔶 **Fase 4 — Integración completa**: orquestador de partida end-to-end
+  (sensores → detector → motor → robot) con manejo de errores, verificación
+  física de las jugadas del robot y modo resync; API REST + WebSocket de
+  partida. Pendiente validar sobre hardware real.
 - ⬜ Fase 5 — UI de exposición (React kiosk)
 
 ## Backend — Fase 1
@@ -109,3 +112,18 @@ cd backend
   bandejas, parámetros por pieza y velocidades —
   ver `config/calibration.example.json`. La rutina asistida de teach
   (freedrive/jog) se completa con el robot real.
+
+## Backend — Fase 4 (integración completa)
+
+- **`GameOrchestrator`** (`app/game_state/orchestrator.py`): máquina de
+  estados de la partida — `human_turn` → confirmación → `robot_turn` →
+  verificación física contra sensores → vuelta al humano. Jugada ilegal del
+  humano → `human_error` con casillas en conflicto; fallo del robot (el
+  tablero no refleja su jugada) → `resync` hasta que el operador corrige.
+- **API de partida** (`app/api/server.py`): `POST /api/game/new`,
+  `POST /api/game/confirm` (botón físico), `POST /api/game/resync-check`,
+  `POST /api/game/difficulty`, `GET /api/game/state` y WebSocket `/ws/game`
+  con el estado en vivo para la UI de exposición.
+- Sin hardware todo corre simulado: driver mock + robot simulado, y el mundo
+  virtual se actualiza solo tras cada jugada del robot. En la Pi:
+  `CHESS_DRIVER=matrix CHESS_ROBOT_HOST=<ip-del-UR>`.
