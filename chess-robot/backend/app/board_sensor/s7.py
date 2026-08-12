@@ -63,26 +63,46 @@ class S7Driver:
         client: S7Client,
         db_in: int = 1,
         db_out: int | None = 2,
+        reconnect: Callable[[], None] | None = None,
     ) -> None:
         """``db_in``: DB que escribe el PLC (tablero/panel/heartbeat).
         ``db_out``: DB que escribe la Pi (baliza). Si es None o igual a
-        ``db_in``, se usa el mismo DB con el status en el offset 12."""
+        ``db_in``, se usa el mismo DB con el status en el offset 12.
+        ``reconnect``: rehace la conexión del cliente; ante un error de
+        comunicación se reintenta la operación una vez (el PLC puede tirar
+        la sesión, p. ej. al entrar TIA online — el driver debe recuperarse
+        solo, es un sistema de exposición)."""
         self._client = client
         self._db_in = db_in
         self._db_out = db_out if db_out is not None else db_in
         self._status_offset = (
             STATUS_OFFSET_SHARED_DB if self._db_out == db_in else STATUS_OFFSET_OWN_DB
         )
+        self._reconnect = reconnect
         self._lock = threading.Lock()
         self._button = False
         self._estop_ok = True
         self._heartbeat = -1
         self._last_heartbeat_change = time.monotonic()
 
+    def _with_retry(self, operation: Callable[[], object]) -> object:
+        try:
+            return operation()
+        except Exception:
+            if self._reconnect is None:
+                raise
+            logger.warning("Conexión S7 caída; reconectando…")
+            try:
+                self._client.disconnect()
+            except Exception:
+                pass
+            self._reconnect()
+            return operation()
+
     # ------------------------------------------------- SensorDriver (scanner)
 
     def read(self) -> Bitmap:
-        data = bytes(self._client.db_read(self._db_in, 0, READ_SIZE))
+        data = bytes(self._with_retry(lambda: self._client.db_read(self._db_in, 0, READ_SIZE)))
         heartbeat = int.from_bytes(data[10:12], "big")  # WORD Siemens: big-endian
         with self._lock:
             self._button = bool(data[8] & 0x01)
@@ -123,7 +143,11 @@ class S7Driver:
     # ------------------------------------------------------------- Pi → PLC
 
     def write_status(self, code: int) -> None:
-        self._client.db_write(self._db_out, self._status_offset, bytearray([code & 0xFF]))
+        self._with_retry(
+            lambda: self._client.db_write(
+                self._db_out, self._status_offset, bytearray([code & 0xFF])
+            )
+        )
 
 
 def open_s7(
@@ -138,7 +162,12 @@ def open_s7(
 
     client = snap7.client.Client()
     client.connect(host, rack, slot)
-    return S7Driver(client, db_in=db_in, db_out=db_out)
+    return S7Driver(
+        client,
+        db_in=db_in,
+        db_out=db_out,
+        reconnect=lambda: client.connect(host, rack, slot),
+    )
 
 
 # --------------------------------------------------------------------- panel

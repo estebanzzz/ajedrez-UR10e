@@ -112,6 +112,43 @@ def test_single_shared_db_uses_offset_12():
     assert client.writes == [(1, STATUS_OFFSET_SHARED_DB, bytes([STATUS_ROBOT_MOVING]))]
 
 
+def test_read_reconnects_after_connection_loss():
+    class FlakyClient(FakeS7Client):
+        def __init__(self) -> None:
+            super().__init__()
+            self.fail_next = 0
+            self.reconnects = 0
+
+        def db_read(self, db_number: int, start: int, size: int) -> bytearray:
+            if self.fail_next > 0:
+                self.fail_next -= 1
+                raise ConnectionError("Not connected")
+            return super().db_read(db_number, start, size)
+
+    client = FlakyClient()
+    client.set_board([chess.E4])
+
+    def reconnect() -> None:
+        client.reconnects += 1
+
+    driver = S7Driver(client, reconnect=reconnect)
+    client.fail_next = 1  # la primera lectura falla → reconectar y reintentar
+    assert driver.read() == 1 << chess.E4
+    assert client.reconnects == 1
+    assert client.disconnected  # se cerró la sesión muerta antes de reconectar
+
+
+def test_read_without_reconnect_propagates_error():
+    class DeadClient(FakeS7Client):
+        def db_read(self, db_number: int, start: int, size: int) -> bytearray:
+            raise ConnectionError("Not connected")
+
+    import pytest
+
+    with pytest.raises(ConnectionError):
+        S7Driver(DeadClient()).read()
+
+
 # ---------------------------------------------------------------- PanelLink
 
 
