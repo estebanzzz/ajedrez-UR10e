@@ -37,6 +37,7 @@ from app.engine import DIFFICULTY_PRESETS, RandomEngine, StockfishEngine, find_s
 from app.game_state import GameState
 from app.game_state.orchestrator import GameOrchestrator
 from app.robot_controller import RobotController, SimulatedRobot
+from app.scores import ScoreStore
 
 WS_POLL_INTERVAL = 0.05  # 20 Hz, igual que la spec de escaneo
 
@@ -82,6 +83,8 @@ def _build_engine(difficulty: str):
 
 class NewGameRequest(BaseModel):
     human_color: str = "white"  # "white" | "black"
+    player_name: str = ""
+    difficulty: str | None = None
 
 
 class DifficultyRequest(BaseModel):
@@ -111,11 +114,16 @@ def create_app(driver_name: str | None = None) -> FastAPI:
     )
     engine = _build_engine(os.environ.get("CHESS_DIFFICULTY", "intermedio"))
     game = GameState()
+    scores = ScoreStore(
+        os.environ.get("CHESS_SCORES_DB", CONFIG_DIR.parent / "data" / "scores.db")
+    )
     # Sin robot real: el mundo simulado se actualiza solo tras cada jugada.
     on_robot_moved = driver.set_bitmap if (
         isinstance(driver, MockDriver) and robot_host is None
     ) else None
-    orchestrator = GameOrchestrator(game, scanner, engine, controller, on_robot_moved)
+    orchestrator = GameOrchestrator(
+        game, scanner, engine, controller, on_robot_moved, scores=scores
+    )
 
     # Con PLC: botón físico de confirmación y baliza según fase de la partida.
     from app.board_sensor.s7 import PanelLink, S7Driver
@@ -142,6 +150,7 @@ def create_app(driver_name: str | None = None) -> FastAPI:
         driver.close()
         engine.close()
         robot_arm.close()
+        scores.close()
 
     app = FastAPI(title="Chess Robot", lifespan=lifespan)
     app.state.scanner = scanner
@@ -207,9 +216,20 @@ def create_app(driver_name: str | None = None) -> FastAPI:
     def game_new(request: NewGameRequest) -> dict:
         if request.human_color not in ("white", "black"):
             raise HTTPException(422, "human_color debe ser 'white' o 'black'")
+        if request.difficulty is not None:
+            if request.difficulty not in DIFFICULTY_PRESETS:
+                raise HTTPException(422, f"Niveles: {', '.join(DIFFICULTY_PRESETS)}")
+            engine.set_difficulty(request.difficulty)
         color = chess.WHITE if request.human_color == "white" else chess.BLACK
-        orchestrator.new_game(human_color=color)
+        orchestrator.new_game(human_color=color, player_name=request.player_name)
         return orchestrator.status()
+
+    @app.get("/api/ranking")
+    def ranking(limit: int = 10) -> dict:
+        return {
+            "today": scores.top_today(limit=limit),
+            "alltime": scores.top_alltime(limit=limit),
+        }
 
     @app.post("/api/game/confirm")
     def game_confirm() -> dict:

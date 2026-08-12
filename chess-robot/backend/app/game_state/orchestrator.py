@@ -28,6 +28,9 @@ from app.game_state.game import GameState
 from app.move_detector import DetectionError, DetectionResult, DetectorPhase
 from app.move_detector.bridge import SensorDetectorBridge
 from app.robot_controller.controller import RobotController
+from app.scores import ScoreStore, compute_score
+
+_PIECE_VALUES = {1: 1, 2: 3, 3: 3, 4: 5, 5: 9}  # peón..dama (rey no cuenta)
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +62,7 @@ class GameOrchestrator:
         engine: Engine,
         robot: RobotController,
         on_robot_moved: Callable[[Bitmap], None] | None = None,
+        scores: ScoreStore | None = None,
     ) -> None:
         """``on_robot_moved`` solo se usa en simulación: recibe el bitmap
         esperado tras el movimiento del robot y actualiza el driver mock
@@ -68,12 +72,15 @@ class GameOrchestrator:
         self._engine = engine
         self._robot = robot
         self._on_robot_moved = on_robot_moved
+        self._scores = scores
         self._bridge = SensorDetectorBridge(scanner, game.board)
         self._lock = threading.RLock()
         self._phase = MatchPhase.IDLE
         self._last_error: str | None = None
         self._robot_steps: list[str] = []
         self._evaluation: dict | None = None
+        self._player_name = ""
+        self._last_game: dict | None = None  # puntaje de la última partida
 
     # ------------------------------------------------------------------ estado
 
@@ -95,6 +102,8 @@ class GameOrchestrator:
             move_stack = self._game.board.move_stack
             return {
                 "phase": self._phase.value,
+                "player_name": self._player_name,
+                "last_game": self._last_game,
                 "fen": self._game.fen,
                 "last_move": move_stack[-1].uci() if move_stack else None,
                 "in_check": self._game.board.is_check(),
@@ -125,7 +134,9 @@ class GameOrchestrator:
 
     # ------------------------------------------------------------------ flujo
 
-    def new_game(self, human_color: chess.Color = chess.WHITE) -> None:
+    def new_game(
+        self, human_color: chess.Color = chess.WHITE, player_name: str = ""
+    ) -> None:
         with self._lock:
             self._bridge.stop()
             self._game.reset()
@@ -134,6 +145,8 @@ class GameOrchestrator:
             self._last_error = None
             self._robot_steps = []
             self._evaluation = None
+            self._player_name = player_name.strip()
+            self._last_game = None
             self._update_evaluation()
             if human_color == chess.WHITE:
                 self._enter_human_turn()
@@ -164,6 +177,7 @@ class GameOrchestrator:
 
             if self._game.outcome() is not None:
                 self._phase = MatchPhase.GAME_OVER
+                self._record_game()
                 return self.status()
             self._phase = MatchPhase.ROBOT_TURN
 
@@ -187,6 +201,55 @@ class GameOrchestrator:
         return True
 
     # ---------------------------------------------------------------- interno
+
+    def _record_game(self) -> None:
+        """Partida terminada: calcular puntaje y registrarlo para el ranking."""
+        outcome = self._game.outcome()
+        if outcome is None:
+            return
+        if outcome.winner is None:
+            result = "draw"
+        elif outcome.winner == self._game.human_color:
+            result = "win"
+        else:
+            result = "loss"
+
+        moves = self._game.board.move_stack
+        human_moves = sum(
+            1 for i, _ in enumerate(moves)
+            if (i % 2 == 0) == (self._game.human_color == chess.WHITE)
+        )
+        # Material capturado al robot: 39 iniciales menos lo que le queda.
+        robot_color = not self._game.human_color
+        remaining = sum(
+            _PIECE_VALUES.get(piece.piece_type, 0)
+            for piece in self._game.board.piece_map().values()
+            if piece.color == robot_color
+        )
+        material = max(0, 39 - remaining)
+        difficulty = getattr(self._engine, "difficulty", "aleatorio")
+        score = compute_score(result, human_moves, material, difficulty)
+
+        self._last_game = {
+            "player_name": self._player_name,
+            "score": score,
+            "result": result,
+            "difficulty": difficulty,
+            "moves": human_moves,
+            "material": material,
+        }
+        if self._scores is not None:
+            try:
+                self._scores.record(
+                    name=self._player_name or "Anónimo",
+                    score=score,
+                    result=result,
+                    difficulty=difficulty,
+                    moves=human_moves,
+                    material=material,
+                )
+            except Exception:
+                logger.exception("No se pudo registrar el puntaje")
 
     def _update_evaluation(self) -> None:
         """Evaluación para la barra de la UI; nunca debe frenar la partida."""
@@ -232,5 +295,6 @@ class GameOrchestrator:
         with self._lock:
             if self._game.outcome() is not None:
                 self._phase = MatchPhase.GAME_OVER
+                self._record_game()
             else:
                 self._enter_human_turn()

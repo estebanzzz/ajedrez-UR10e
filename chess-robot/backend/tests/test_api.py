@@ -11,8 +11,10 @@ def make_client() -> TestClient:
     # Motor aleatorio: los tests no deben depender de Stockfish ni lanzar
     # procesos pesados (en la Pi, varios Stockfish agotan la RAM).
     import os
+    import tempfile
 
     os.environ["CHESS_ENGINE"] = "random"
+    os.environ["CHESS_SCORES_DB"] = os.path.join(tempfile.mkdtemp(), "scores.db")
     return TestClient(create_app(driver_name="mock"))
 
 

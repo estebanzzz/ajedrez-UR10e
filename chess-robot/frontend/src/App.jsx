@@ -1,30 +1,27 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Board from './Board.jsx'
 import EvalBar from './EvalBar.jsx'
+import GameOver from './GameOver.jsx'
 import OperatorPanel from './OperatorPanel.jsx'
-import { api, useSocket } from './useGameSocket.js'
-
-const DIFFICULTIES = [
-  { id: 'principiante', label: 'Principiante' },
-  { id: 'intermedio', label: 'Intermedio' },
-  { id: 'avanzado', label: 'Avanzado' },
-  { id: 'maximo', label: 'Máximo' },
-]
+import Ranking from './Ranking.jsx'
+import StartScreen from './StartScreen.jsx'
+import { useSocket } from './useGameSocket.js'
 
 const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
 function bannerFor(status) {
   if (!status) return { text: 'Conectando…', tone: 'neutral' }
+  const name = status.player_name ? `, ${status.player_name.split(' ')[0]}` : ''
   switch (status.phase) {
     case 'idle':
-      return { text: '¿Jugamos? Pedile al operador una partida nueva', tone: 'neutral' }
+      return { text: '¿Jugamos?', tone: 'neutral' }
     case 'human_turn': {
       if (status.detector_phase === 'in_progress')
         return { text: 'Jugada en curso…', tone: 'active' }
       if (status.detector_phase === 'complete')
         return { text: 'Pulsá el botón para confirmar tu jugada', tone: 'active' }
       const check = status.in_check ? ' — ¡Jaque!' : ''
-      return { text: `Tu turno${check}`, tone: 'human' }
+      return { text: `Tu turno${name}${check}`, tone: 'human' }
     }
     case 'human_error':
       return { text: status.last_error || 'Jugada no válida — restaurá las piezas', tone: 'error' }
@@ -32,16 +29,8 @@ function bannerFor(status) {
       return { text: 'Pensando…', tone: 'robot' }
     case 'resync':
       return { text: 'Ajustando el tablero — un momento…', tone: 'error' }
-    case 'game_over': {
-      const outcome = status.outcome
-      if (!outcome) return { text: 'Fin de partida', tone: 'neutral' }
-      if (outcome.winner === null) return { text: `Tablas (${outcome.termination})`, tone: 'neutral' }
-      const humanWon = outcome.winner === status.human_color
-      return {
-        text: humanWon ? '¡Ganaste! Felicitaciones 🎉' : 'Gana el robot — ¡buena partida!',
-        tone: humanWon ? 'human' : 'robot',
-      }
-    }
+    case 'game_over':
+      return { text: 'Fin de partida', tone: 'neutral' }
     default:
       return { text: '', tone: 'neutral' }
   }
@@ -51,7 +40,6 @@ function MoveHistory({ sans }) {
   const rows = []
   for (let i = 0; i < sans.length; i += 2)
     rows.push({ n: i / 2 + 1, white: sans[i], black: sans[i + 1] })
-  const endRef = useRef(null)
   return (
     <div className="history">
       <table>
@@ -65,7 +53,6 @@ function MoveHistory({ sans }) {
           ))}
         </tbody>
       </table>
-      <div ref={endRef} />
     </div>
   )
 }
@@ -73,8 +60,18 @@ function MoveHistory({ sans }) {
 export default function App() {
   const { message: status, connected } = useSocket('/ws/game')
   const [operatorOpen, setOperatorOpen] = useState(false)
-  const [difficulty, setDifficulty] = useState('intermedio')
+  const [startRequested, setStartRequested] = useState(false)
+  const [rankingKey, setRankingKey] = useState(0)
   const tapsRef = useRef({ count: 0, last: 0 })
+  const prevPhaseRef = useRef(null)
+
+  // Refrescar el ranking cuando termina una partida.
+  useEffect(() => {
+    const phase = status?.phase
+    if (phase === 'game_over' && prevPhaseRef.current !== 'game_over')
+      setRankingKey((k) => k + 1)
+    prevPhaseRef.current = phase
+  }, [status?.phase])
 
   // Panel de operador oculto: 5 toques rápidos sobre el título.
   const handleTitleTap = () => {
@@ -88,12 +85,10 @@ export default function App() {
     }
   }
 
-  const setLevel = async (level) => {
-    setDifficulty(level)
-    await api('/api/game/difficulty', { level })
-  }
-
   const banner = useMemo(() => bannerFor(status), [status])
+  const phase = status?.phase
+  const showStart = phase === 'idle' || startRequested
+  const showGameOver = phase === 'game_over' && !startRequested
 
   return (
     <div className="app">
@@ -105,27 +100,16 @@ export default function App() {
       <div className={`banner ${banner.tone}`}>{banner.text}</div>
 
       <main>
+        <Ranking refreshKey={rankingKey} />
         <EvalBar evaluation={status?.evaluation} />
         <Board
           fen={status?.fen || START_FEN}
           lastMove={status?.last_move}
-          mismatched={status?.phase === 'human_error' || status?.phase === 'resync'
+          mismatched={phase === 'human_error' || phase === 'resync'
             ? status?.mismatched_squares
             : []}
         />
         <aside>
-          <section className="difficulty">
-            <h3>Dificultad</h3>
-            {DIFFICULTIES.map((d) => (
-              <button
-                key={d.id}
-                className={difficulty === d.id ? 'selected' : ''}
-                onClick={() => setLevel(d.id)}
-              >
-                {d.label}
-              </button>
-            ))}
-          </section>
           <section>
             <h3>Jugadas</h3>
             <MoveHistory sans={status?.san_history || []} />
@@ -133,6 +117,12 @@ export default function App() {
         </aside>
       </main>
 
+      {showStart && status && (
+        <StartScreen onStarted={() => setStartRequested(false)} />
+      )}
+      {showGameOver && (
+        <GameOver status={status} onPlayAgain={() => setStartRequested(true)} />
+      )}
       {operatorOpen && (
         <OperatorPanel status={status} onClose={() => setOperatorOpen(false)} />
       )}

@@ -49,14 +49,21 @@ class ScriptedEngine:
 class Rig:
     """Banco de pruebas: orquestador completo sobre mundo simulado."""
 
-    def __init__(self, engine_moves: list[str], drop_robot_pieces: bool = False):
+    def __init__(
+        self, engine_moves: list[str], drop_robot_pieces: bool = False, scores=None
+    ):
         self.driver = MockDriver(initial=chess.Board().occupied)
         self.scanner = BoardScanner(self.driver, scan_hz=200.0, stable_reads=2)
         self.game = GameState()
         robot = RobotController(SimulatedRobot(), BOARD_GEO, TRAY, RESERVE)
         on_moved = None if drop_robot_pieces else self.driver.set_bitmap
         self.orchestrator = GameOrchestrator(
-            self.game, self.scanner, ScriptedEngine(engine_moves), robot, on_moved
+            self.game,
+            self.scanner,
+            ScriptedEngine(engine_moves),
+            robot,
+            on_moved,
+            scores=scores,
         )
         self.scanner.start()
         assert self.scanner.wait_for_bitmap(chess.Board().occupied, timeout=1.0)
@@ -159,3 +166,29 @@ def test_confirm_out_of_turn_is_rejected(rig):
     status = rig.orchestrator.confirm()  # sin partida iniciada
     assert status["phase"] == "idle"
     assert status["last_error"] == "No es el turno del humano."
+
+
+def test_finished_game_records_score(tmp_path):
+    from app.scores import ScoreStore
+
+    scores = ScoreStore(tmp_path / "scores.db")
+    rig = Rig(["e7e5", "b8c6", "g8f6"], scores=scores)
+    try:
+        rig.orchestrator.new_game(human_color=chess.WHITE, player_name="Esteban Z")
+        for uci in ["e2e4", "f1c4", "d1h5"]:
+            rig.human_plays(uci)
+        status = rig.human_plays("h5f7")  # Qxf7#
+
+        assert status["phase"] == "game_over"
+        last = status["last_game"]
+        assert last["player_name"] == "Esteban Z"
+        assert last["result"] == "win"
+        assert last["moves"] == 4
+        assert last["material"] == 1  # el peón de f7
+        assert last["score"] > 1000
+
+        ranking = scores.top_today()
+        assert ranking[0]["name"] == "Esteban Z"
+        assert ranking[0]["score"] == last["score"]
+    finally:
+        rig.stop()

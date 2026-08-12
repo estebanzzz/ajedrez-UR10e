@@ -83,6 +83,60 @@ aside h3 { font-size: .85rem; color: var(--muted); text-transform: uppercase; ma
 .history td { padding: .15rem .4rem; }
 .move-number { color: var(--muted); width: 2.2rem; }
 
+/* ------------------------------------------------------------------ ranking */
+.ranking { display: flex; flex-direction: column; gap: 1rem; width: 17rem; }
+.ranking section { background: var(--panel); border-radius: .6rem; padding: .8rem; }
+.ranking h3 { font-size: .95rem; color: var(--muted); margin-bottom: .6rem; }
+.ranking ol { list-style: none; display: flex; flex-direction: column; gap: .3rem; }
+.ranking li { display: flex; align-items: center; gap: .5rem; padding: .3rem .5rem;
+              border-radius: .4rem; font-size: 1.02rem; }
+.ranking li.leader { background: rgba(232, 212, 77, .15); border: 1px solid rgba(232, 212, 77, .4); }
+.rank-pos { color: var(--muted); width: 1.4rem; text-align: right; }
+.rank-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rank-score { font-weight: 700; color: var(--accent); }
+.ranking-empty { color: var(--muted); font-size: .95rem; }
+.prize-note { color: #e8d44d; font-size: .85rem; margin-top: .6rem; }
+.alltime .record { font-size: 1.05rem; }
+
+/* -------------------------------------------------- inicio / fin de partida */
+.overlay {
+  position: fixed; inset: 0; background: rgba(10, 10, 14, .82); z-index: 5;
+  display: flex; align-items: center; justify-content: center;
+}
+.start-card {
+  background: var(--panel); border-radius: 1rem; padding: 2rem 2.4rem;
+  display: flex; flex-direction: column; gap: .7rem; width: min(34rem, 92vw);
+  border: 1px solid #3a3a46; box-shadow: 0 10px 40px rgba(0,0,0,.6);
+}
+.start-card h2 { font-size: 1.5rem; text-align: center; margin-bottom: .4rem; }
+.start-card label { color: var(--muted); font-size: .9rem; margin-top: .4rem; }
+.start-card input {
+  background: #2c2c38; border: 1px solid #3a3a46; color: var(--text);
+  font-size: 1.3rem; padding: .6rem .8rem; border-radius: .5rem; outline: none;
+}
+.start-card input:focus { border-color: var(--accent); }
+.difficulty-row { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
+.difficulty-row button {
+  background: #2c2c38; border: 1px solid #3a3a46; color: var(--text);
+  padding: .55rem; border-radius: .45rem; font-size: 1rem; cursor: pointer;
+}
+.difficulty-row button.selected {
+  background: var(--accent); border-color: var(--accent); color: #101018; font-weight: 700;
+}
+.difficulty-row small { opacity: .7; }
+.hint { color: var(--muted); font-size: .85rem; }
+.play-button {
+  margin-top: .6rem; background: #2f9e44; border: none; color: #fff;
+  font-size: 1.3rem; font-weight: 700; padding: .8rem; border-radius: .6rem;
+  cursor: pointer;
+}
+.play-button:disabled { opacity: .4; cursor: default; }
+.gameover-card { text-align: center; align-items: center; }
+.gameover-name { color: var(--muted); font-size: 1.1rem; }
+.score-big { font-size: 3.2rem; font-weight: 800; color: #e8d44d; }
+.score-breakdown { display: flex; gap: 1rem; color: var(--muted); font-size: .9rem;
+                   flex-wrap: wrap; justify-content: center; }
+
 /* ---------------------------------------------------------- panel operador */
 .operator-panel {
   position: fixed; inset: 2rem; background: var(--panel); border-radius: 1rem;

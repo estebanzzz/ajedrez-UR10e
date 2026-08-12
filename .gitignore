@@ -11,3 +11,6 @@ dist/
 
 # Config local / calibración de cada instalación
 chess-robot/backend/config/local_*
+
+# Datos de la instalación (puntajes de la feria)
+chess-robot/backend/data/
