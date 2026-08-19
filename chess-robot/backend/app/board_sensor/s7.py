@@ -80,6 +80,10 @@ class S7Driver:
         )
         self._reconnect = reconnect
         self._lock = threading.Lock()
+        # El cliente snap7 NO es thread-safe: el scanner (lecturas a 30 Hz) y
+        # el PanelLink (escrituras de baliza) deben serializarse o el
+        # protocolo se corrompe y el PLC resetea la sesión.
+        self._io_lock = threading.Lock()
         self._button = False
         self._estop_ok = True
         self._heartbeat = -1
@@ -89,26 +93,27 @@ class S7Driver:
     RECONNECT_BACKOFF_S = 2.0
 
     def _with_retry(self, operation: Callable[[], object]) -> object:
-        try:
-            return operation()
-        except Exception:
-            if self._reconnect is None:
-                raise
-            # Sin backoff, el scanner (30 Hz) martilla al PLC con conexiones
-            # nuevas y este empieza a resetear sesiones.
-            if time.monotonic() < self._backoff_until:
-                raise
-            logger.warning("Conexión S7 caída; reconectando…")
+        with self._io_lock:
             try:
-                self._client.disconnect()
+                return operation()
             except Exception:
-                pass
-            try:
-                self._reconnect()
-            except Exception:
-                self._backoff_until = time.monotonic() + self.RECONNECT_BACKOFF_S
-                raise
-            return operation()
+                if self._reconnect is None:
+                    raise
+                # Sin backoff, el scanner (30 Hz) martilla al PLC con
+                # conexiones nuevas y este empieza a resetear sesiones.
+                if time.monotonic() < self._backoff_until:
+                    raise
+                logger.warning("Conexión S7 caída; reconectando…")
+                try:
+                    self._client.disconnect()
+                except Exception:
+                    pass
+                try:
+                    self._reconnect()
+                except Exception:
+                    self._backoff_until = time.monotonic() + self.RECONNECT_BACKOFF_S
+                    raise
+                return operation()
 
     # ------------------------------------------------- SensorDriver (scanner)
 
