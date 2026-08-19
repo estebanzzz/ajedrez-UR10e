@@ -1,4 +1,5 @@
-# Dependencias que solo aplican en la Raspberry Pi (hardware real)
+# Dependencias que solo aplican con hardware real (Raspberry Pi o PC de pruebas)
 -r requirements.txt
 python-snap7>=1.4   # PLC S7-1200: lectura del tablero vía DB (driver s7)
 gpiod>=2.1          # libgpiod v2: barrido de matriz por GPIO (respaldo)
+ur_rtde>=1.6        # UR10e: control y lectura por RTDE (driver del robot)

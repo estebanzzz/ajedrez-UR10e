@@ -31,8 +31,10 @@ from pydantic import BaseModel
 
 from app.board_sensor import BoardScanner, MockDriver
 from app.board_sensor.bitmap import FULL_START_BITMAP, squares_from_bitmap
+from app.api.calibration_page import CALIBRATION_HTML
 from app.api.diagnostics import DIAGNOSTICS_HTML
 from app.calibration import CalibrationStore
+from app.calibration.wizard import CalibrationWizard
 from app.engine import DIFFICULTY_PRESETS, RandomEngine, StockfishEngine, find_stockfish
 from app.game_state import GameState
 from app.game_state.orchestrator import GameOrchestrator
@@ -89,6 +91,20 @@ class NewGameRequest(BaseModel):
 
 class DifficultyRequest(BaseModel):
     level: str
+
+
+class FreedriveRequest(BaseModel):
+    enabled: bool
+
+
+class GripperRequest(BaseModel):
+    opening_mm: float
+    force: float = 0.25
+
+
+class GotoSquareRequest(BaseModel):
+    square: str
+    clearance_mm: float = 80.0
 
 
 def create_app(driver_name: str | None = None) -> FastAPI:
@@ -205,6 +221,116 @@ def create_app(driver_name: str | None = None) -> FastAPI:
             raise HTTPException(400, "Solo disponible con el driver mock")
         driver.set_bitmap(FULL_START_BITMAP)
         return {"bitmap": FULL_START_BITMAP}
+
+    # ------------------------------------------------- robot y calibración
+
+    wizard_holder: dict[str, CalibrationWizard | None] = {"wizard": None}
+    calibration_path = CONFIG_DIR / "calibration.json"
+
+    @app.get("/calibration", response_class=HTMLResponse)
+    def calibration_page() -> str:
+        return CALIBRATION_HTML
+
+    @app.get("/api/robot/status")
+    def robot_status() -> dict:
+        return robot_arm.status()
+
+    @app.post("/api/robot/freedrive")
+    def robot_freedrive(request: FreedriveRequest) -> dict:
+        try:
+            robot_arm.set_freedrive(request.enabled)
+        except RuntimeError as exc:
+            raise HTTPException(409, str(exc))
+        return {"freedrive": request.enabled}
+
+    @app.post("/api/robot/gripper")
+    def robot_gripper(request: GripperRequest) -> dict:
+        if not 0 <= request.opening_mm <= 50:
+            raise HTTPException(422, "opening_mm debe estar entre 0 y 50")
+        robot_arm.gripper_move(request.opening_mm, request.force)
+        return {"opening_mm": request.opening_mm}
+
+    def _wizard() -> CalibrationWizard:
+        wizard = wizard_holder["wizard"]
+        if wizard is None:
+            raise HTTPException(409, "No hay sesión de calibración: iniciá una")
+        return wizard
+
+    @app.post("/api/calibration/start")
+    def calibration_start() -> dict:
+        base = None
+        store = CalibrationStore(calibration_path)
+        if store.exists():
+            base = store.load()
+        wizard_holder["wizard"] = CalibrationWizard(robot_arm, base=base)
+        return wizard_holder["wizard"].state()
+
+    @app.get("/api/calibration/state")
+    def calibration_state() -> dict:
+        return _wizard().state()
+
+    @app.post("/api/calibration/capture")
+    def calibration_capture() -> dict:
+        try:
+            return _wizard().capture()
+        except RuntimeError as exc:
+            raise HTTPException(409, str(exc))
+
+    @app.post("/api/calibration/back")
+    def calibration_back() -> dict:
+        return _wizard().back()
+
+    @app.post("/api/calibration/save")
+    def calibration_save() -> dict:
+        wizard = _wizard()
+        current_host = robot_host or _load_calibration().robot_host
+        try:
+            data = wizard.build(robot_host=current_host)
+        except RuntimeError as exc:
+            raise HTTPException(409, str(exc))
+        CalibrationStore(calibration_path).save(data)
+        return {
+            "path": str(calibration_path),
+            "summary": wizard.summary(),
+            "note": (
+                "La partida usa la calibración cargada al iniciar el servidor: "
+                "reiniciarlo para aplicar la nueva."
+            ),
+        }
+
+    @app.post("/api/calibration/goto")
+    def calibration_goto(request: GotoSquareRequest) -> dict:
+        """Prueba: mueve el TCP (lento) a la altura segura sobre una casilla."""
+        from app.robot_controller.robot import Pose
+
+        store = CalibrationStore(calibration_path)
+        if not store.exists():
+            raise HTTPException(409, "No hay calibración guardada todavía")
+        try:
+            square = chess.SQUARE_NAMES.index(request.square.lower())
+        except ValueError:
+            raise HTTPException(422, f"Casilla inválida: {request.square}")
+        if not 20.0 <= request.clearance_mm <= 300.0:
+            raise HTTPException(422, "clearance_mm debe estar entre 20 y 300")
+
+        center = store.load().board.square_center(square)
+        target_z = center.z + request.clearance_mm / 1000.0
+        speed, accel = 0.10, 0.3  # lento: es un movimiento de verificación
+
+        try:
+            current = robot_arm.get_tcp_pose()
+            travel_z = max(target_z, current.position.z)
+            # Subir, trasladar en horizontal y recién entonces descender.
+            robot_arm.move_linear(current.at_height(travel_z), speed, accel)
+            target = Pose(center, current.rx, current.ry, current.rz)
+            robot_arm.move_linear(target.at_height(travel_z), speed, accel)
+            robot_arm.move_linear(target.at_height(target_z), speed, accel)
+        except RuntimeError as exc:
+            raise HTTPException(409, str(exc))
+        return {
+            "square": request.square.lower(),
+            "target": {"x": center.x, "y": center.y, "z": target_z},
+        }
 
     # -------------------------------------------------------------- partida
 
