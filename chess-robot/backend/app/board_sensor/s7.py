@@ -84,6 +84,9 @@ class S7Driver:
         self._estop_ok = True
         self._heartbeat = -1
         self._last_heartbeat_change = time.monotonic()
+        self._backoff_until = 0.0
+
+    RECONNECT_BACKOFF_S = 2.0
 
     def _with_retry(self, operation: Callable[[], object]) -> object:
         try:
@@ -91,12 +94,20 @@ class S7Driver:
         except Exception:
             if self._reconnect is None:
                 raise
+            # Sin backoff, el scanner (30 Hz) martilla al PLC con conexiones
+            # nuevas y este empieza a resetear sesiones.
+            if time.monotonic() < self._backoff_until:
+                raise
             logger.warning("Conexión S7 caída; reconectando…")
             try:
                 self._client.disconnect()
             except Exception:
                 pass
-            self._reconnect()
+            try:
+                self._reconnect()
+            except Exception:
+                self._backoff_until = time.monotonic() + self.RECONNECT_BACKOFF_S
+                raise
             return operation()
 
     # ------------------------------------------------- SensorDriver (scanner)
@@ -157,17 +168,23 @@ def open_s7(
     db_in: int = 1,
     db_out: int | None = 2,
 ) -> S7Driver:
-    """Conecta al PLC real (import diferido: python-snap7 solo en la Pi)."""
+    """Conecta al PLC real (import diferido: python-snap7 solo en la Pi).
+
+    Si el PLC no responde en el arranque, el servidor igual levanta: la
+    conexión se reintenta sola en cada lectura (con backoff).
+    """
     import snap7
 
     client = snap7.client.Client()
-    client.connect(host, rack, slot)
-    return S7Driver(
-        client,
-        db_in=db_in,
-        db_out=db_out,
-        reconnect=lambda: client.connect(host, rack, slot),
-    )
+
+    def _connect() -> None:
+        client.connect(host, rack, slot)
+
+    try:
+        _connect()
+    except Exception as exc:
+        logger.warning("PLC %s no disponible al iniciar (%s); se reintentará", host, exc)
+    return S7Driver(client, db_in=db_in, db_out=db_out, reconnect=_connect)
 
 
 # --------------------------------------------------------------------- panel
