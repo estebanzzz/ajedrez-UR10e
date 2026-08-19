@@ -176,6 +176,12 @@ def open_s7(
     import snap7
 
     client = snap7.client.Client()
+    try:
+        # Tipo de conexión 3 (S7 Basic): no compite con la sesión PG de TIA
+        # Portal — con tipo PG (default), el PLC resetea una u otra al azar.
+        client.set_connection_type(3)
+    except Exception:
+        logger.warning("set_connection_type no disponible en esta versión de snap7")
 
     def _connect() -> None:
         client.connect(host, rack, slot)
