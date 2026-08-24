@@ -1,5 +1,54 @@
 # Proyecto: Robot Ajedrecista UR10e — Exposición
 
+## 0. Reglas de trabajo (git y deploy)
+
+Estas reglas son obligatorias para cualquiera —persona o asistente— que toque
+este repositorio.
+
+**Repositorio remoto:** `origin` → <https://github.com/estebanzzz/ajedrez-UR10e>
+(privado). Es la fuente de verdad del proyecto. El remoto `pi` (repo bare en la
+Raspberry) es legado y no reemplaza a GitHub.
+
+### 0.1 Siempre commitear antes de editar
+
+Antes de empezar a modificar archivos, el árbol de trabajo tiene que estar
+limpio:
+
+```bash
+git status --short          # si hay algo, se commitea ANTES de tocar nada
+git add -A
+git commit -m "..."
+```
+
+Así cada tanda de cambios queda aislada en su propio commit, el `diff` de lo que
+se está haciendo ahora es legible, y siempre existe un punto al que volver si
+algo se rompe. Nunca se empieza una edición sobre cambios ajenos sin commitear.
+
+### 0.2 Siempre pushear a GitHub antes de deployar a la Raspberry
+
+El deploy a la Pi es el **último** paso, nunca el primero. El orden es siempre:
+
+```bash
+git add -A
+git commit -m "..."
+git push origin main
+```
+
+```powershell
+# recién ahora, con GitHub ya actualizado:
+cd chess-robot
+.\deploy\deploy_to_pi.ps1 -PiHost 192.168.0.10 -Restart -KeepConfig
+```
+
+Motivo: `deploy_to_pi.ps1` copia el árbol por SSH sin pasar por git, así que lo
+que corre en la Pi puede no existir en ningún lado más. Si se deploya sin
+pushear y la Pi (o la PC) se pierde, el código se pierde con ella. Con el push
+hecho primero, lo que corre en la expo siempre tiene su commit correspondiente
+en GitHub y se puede reconstruir.
+
+`-KeepConfig` conserva la calibración que vive en la Pi (`backend/config/`); se
+omite solo cuando se quiere pisar la calibración a propósito.
+
 ## 1. Resumen
 
 Sistema demostrativo para exposición en el que un robot colaborativo **Universal Robots UR10e** juega al ajedrez contra un humano sobre un tablero físico. La detección de piezas es por **visión artificial (cámara cenital + OpenCV)**. El control central es una **Raspberry Pi 5**, que ejecuta el motor de ajedrez, procesa la imagen del tablero, comanda el robot y la garra **Robotiq**, y sirve una interfaz gráfica en pantalla para el público con tablero virtual y evaluación de la partida en tiempo real.

@@ -233,6 +233,15 @@ npm run dev          # desarrollo con hot-reload (proxy al backend en :8000)
 los archivos sin commitear: `app/vision/`, la calibración de `config/`, etc.),
 buildeando antes el frontend en la PC para no necesitar Node en la Pi.
 
+> **Antes de deployar hay que pushear a GitHub.** Como la copia no pasa por
+> git, lo que corre en la Pi puede no existir en ningún otro lado. El orden es
+> siempre `git commit` → `git push origin main` → `deploy_to_pi.ps1`
+> (ver [Reglas de trabajo](../PROYECTO_ROBOT_AJEDREZ.md#0-reglas-de-trabajo-git-y-deploy)):
+>
+> ```bash
+> git add -A && git commit -m "..." && git push origin main
+> ```
+
 ```powershell
 # Actualizar el código y reiniciar el backend
 .\deploy\deploy_to_pi.ps1 -PiHost 192.168.0.10 -Restart
