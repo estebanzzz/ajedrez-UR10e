@@ -16,7 +16,7 @@ const TIMES = [
   { minutes: 0, label: 'Sin reloj' },
 ]
 
-export default function StartScreen({ onStarted, speech }) {
+export default function StartScreen({ onStarted, onClose, speech }) {
   const [name, setName] = useState('')
   const [difficulty, setDifficulty] = useState('intermedio')
   const [timeMinutes, setTimeMinutes] = useState(5)
@@ -63,8 +63,13 @@ export default function StartScreen({ onStarted, speech }) {
   }
 
   return (
-    <div className="overlay">
-      <div className="start-card">
+    <div className="overlay" onClick={onClose}>
+      <div className="start-card" onClick={(e) => e.stopPropagation()}>
+        {onClose && (
+          <button className="card-close" aria-label="Cerrar" onClick={onClose}>
+            ✕
+          </button>
+        )}
         <h2>¿Te animás a jugarle al robot?</h2>
         <label htmlFor="player-name">Nombre y apellido</label>
         <input

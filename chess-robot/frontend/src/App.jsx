@@ -172,7 +172,10 @@ export default function App() {
   const banner = useMemo(() => bannerFor(status), [status])
   const phase = status?.phase
   const selfPlay = status?.mode === 'self_play'
-  const showStart = phase === 'idle' || startRequested
+  // El formulario de inicio ya no se abre solo en idle: así el ranking y el
+  // tablero quedan visibles. Se abre con el botón "Iniciar partida" (o con
+  // "jugar de nuevo" en la pantalla de fin) y se puede cerrar tocando afuera.
+  const showStart = startRequested
   const showGameOver = phase === 'game_over' && !startRequested
 
   // Botón de confirmación en pantalla (mientras no exista el botón físico).
@@ -273,6 +276,14 @@ export default function App() {
       <div className={`banner ${banner.tone}`}>
         <GameClock clock={status?.clock} />
         <span>{banner.text}</span>
+        {phase === 'idle' && !startRequested && (
+          <button
+            className="start-game-button"
+            onClick={() => setStartRequested(true)}
+          >
+            ▶ Iniciar partida
+          </button>
+        )}
         {showConfirm && (
           <button
             className={'confirm-move' + (moveReady ? ' ready' : ' armed')}
@@ -376,7 +387,11 @@ export default function App() {
         </div>
       )}
       {showStart && status && (
-        <StartScreen onStarted={() => setStartRequested(false)} speech={status?.speech} />
+        <StartScreen
+          onStarted={() => setStartRequested(false)}
+          onClose={() => setStartRequested(false)}
+          speech={status?.speech}
+        />
       )}
       {showGameOver && (
         <GameOver status={status} onPlayAgain={() => setStartRequested(true)} />

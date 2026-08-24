@@ -146,6 +146,21 @@ aside h3 { font-size: .85rem; color: var(--muted); text-transform: uppercase; ma
   background: var(--panel); border-radius: 1rem; padding: 2rem 2.4rem;
   display: flex; flex-direction: column; gap: .7rem; width: min(34rem, 92vw);
   border: 1px solid #3a3a46; box-shadow: 0 10px 40px rgba(0,0,0,.6);
+  position: relative;
+}
+.card-close {
+  position: absolute; top: .6rem; right: .8rem; background: transparent;
+  border: none; color: var(--muted); font-size: 1.5rem; line-height: 1;
+  padding: .3rem .5rem; cursor: pointer;
+}
+.card-close:hover { color: var(--text); }
+
+/* Botón del banner que abre el formulario de inicio (en idle el popup ya no
+   se abre solo, para que el ranking del día quede visible). */
+.start-game-button {
+  font-size: 1.2rem; font-weight: 700; padding: .5rem 1.6rem;
+  border-radius: .6rem; border: none; background: #2f9e44; color: #fff;
+  cursor: pointer; animation: confirm-pulse 1.6s ease-in-out infinite;
 }
 .start-card h2 { font-size: 1.5rem; text-align: center; margin-bottom: .4rem; }
 .start-card label { color: var(--muted); font-size: .9rem; margin-top: .4rem; }
