@@ -147,6 +147,9 @@ aside h3 { font-size: .85rem; color: var(--muted); text-transform: uppercase; ma
   display: flex; flex-direction: column; gap: .7rem; width: min(34rem, 92vw);
   border: 1px solid #3a3a46; box-shadow: 0 10px 40px rgba(0,0,0,.6);
   position: relative;
+  /* En pantallas bajas el formulario (con email) supera el alto visible:
+     que scrollee dentro de la tarjeta en vez de cortarse. */
+  max-height: 92vh; overflow-y: auto;
 }
 .card-close {
   position: absolute; top: .6rem; right: .8rem; background: transparent;
