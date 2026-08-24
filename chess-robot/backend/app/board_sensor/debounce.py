@@ -20,6 +20,14 @@ class Debouncer:
         """Último bitmap estable conocido (None hasta la primera estabilización)."""
         return self._stable
 
+    def set_stable_reads(self, stable_reads: int) -> None:
+        """Cambia el debounce en caliente (ajuste desde la UI)."""
+        if stable_reads < 1:
+            raise ValueError("stable_reads debe ser >= 1")
+        self._required = int(stable_reads)
+        self._candidate = None
+        self._count = 0
+
     def feed(self, bitmap: Bitmap) -> Bitmap | None:
         """Procesa una lectura cruda.
 

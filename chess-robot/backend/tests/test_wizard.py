@@ -35,8 +35,39 @@ def test_steps_reserve_single_row_skips_row_point():
     assert keys == [
         "board_a1", "board_h1", "board_a8", "board_h8",
         "capture_origin", "capture_col", "capture_row",
-        "reserve_origin", "reserve_col",
+        "reserve_origin", "reserve_col", "park",
     ]
+
+
+def test_free_order_capture_and_manual_edit():
+    robot = SimulatedRobot()
+    wizard = CalibrationWizard(robot)
+    # Orden libre: captura de un punto cualquiera primero.
+    robot.pose = Pose(POINTS["reserve_col"])
+    wizard.capture_key("reserve_col")
+    # Y edición manual por texto de otro.
+    wizard.set_point("board_a1", POINTS["board_a1"])
+    state = wizard.state()
+    by_key = {s["key"]: s for s in state["steps"]}
+    assert by_key["reserve_col"]["captured"] == {"x": 0.95, "y": 0.30, "z": 0.020}
+    assert by_key["board_a1"]["captured"] == {"x": 0.40, "y": -0.175, "z": 0.020}
+    assert not state["done"]
+
+    with pytest.raises(ValueError, match="desconocido"):
+        wizard.set_point("no_existe", Point3(0, 0, 0))
+
+
+def test_park_is_optional_and_persists():
+    robot = SimulatedRobot()
+    wizard = CalibrationWizard(robot)
+    teach_all(wizard, robot)
+    assert wizard.done  # sin park igual está completo
+    assert wizard.build(robot_host="x").park is None
+
+    park = Point3(0.20, -0.40, 0.35)
+    wizard.set_point("park", park)
+    data = wizard.build(robot_host="x")
+    assert data.park == park
 
 
 def test_capture_walk_and_build():
@@ -103,6 +134,7 @@ def test_roundtrip_through_store(tmp_path):
     robot = SimulatedRobot()
     wizard = CalibrationWizard(robot)
     teach_all(wizard, robot)
+    wizard.set_point("park", Point3(0.20, -0.40, 0.35))
     data = wizard.build(robot_host="192.168.0.25")
 
     store = CalibrationStore(tmp_path / "calibration.json")
@@ -111,3 +143,24 @@ def test_roundtrip_through_store(tmp_path):
     assert loaded.board == data.board
     assert loaded.capture_tray == data.capture_tray
     assert loaded.reserve_tray == data.reserve_tray
+    assert loaded.park == Point3(0.20, -0.40, 0.35)
+
+
+def test_prefill_from_saved_calibration():
+    robot = SimulatedRobot()
+    first = CalibrationWizard(robot)
+    teach_all(first, robot)
+    first.set_point("park", Point3(0.20, -0.40, 0.35))
+    data = first.build(robot_host="x")
+
+    wizard = CalibrationWizard(robot, base=data, prefill=True)
+    assert wizard.done  # todos los puntos precargados
+    by_key = {s["key"]: s for s in wizard.state()["steps"]}
+    assert by_key["board_a1"]["captured"] == {"x": 0.40, "y": -0.175, "z": 0.020}
+    assert by_key["capture_col"]["captured"]["x"] == pytest.approx(0.95)
+    assert by_key["park"]["captured"] == {"x": 0.20, "y": -0.40, "z": 0.35}
+    # Corregir un solo punto y reconstruir conserva el resto.
+    wizard.set_point("board_h8", Point3(0.751, 0.176, 0.021))
+    rebuilt = wizard.build(robot_host="x")
+    assert rebuilt.board.a1 == data.board.a1
+    assert rebuilt.board.h8 == Point3(0.751, 0.176, 0.021)

@@ -26,8 +26,45 @@ header h1 { font-size: 1.4rem; cursor: default; }
 .disconnected { color: #e66; font-size: .85rem; }
 
 .banner {
+  display: flex; align-items: center; justify-content: center; gap: 1.2rem;
   text-align: center; font-size: 1.6rem; font-weight: 600;
   padding: .6rem; border-radius: .6rem; background: var(--panel);
+}
+
+/* Botón de confirmación en pantalla (sustituto del botón físico del PLC) */
+.confirm-move {
+  font-size: 1.2rem; font-weight: 700; padding: .5rem 1.4rem;
+  border-radius: .6rem; border: 2px solid #3a3a46; cursor: pointer;
+  background: #2c2c38; color: var(--muted); transition: all .2s ease;
+}
+.confirm-move:disabled { opacity: .45; cursor: default; }
+.confirm-move.armed { background: #2f7d3a; border-color: #4c9459; color: #fff; }
+.confirm-move.ready {
+  background: #2f7d3a; border-color: #7fd47f; color: #fff;
+  animation: confirm-pulse 1.2s ease-in-out infinite;
+}
+@keyframes confirm-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(127, 212, 127, .55); }
+  50% { box-shadow: 0 0 0 10px rgba(127, 212, 127, 0); }
+}
+
+/* Recuadro de depuración: vista de la cámara abajo a la derecha */
+.camera-debug {
+  position: fixed; right: 1rem; bottom: 1rem; z-index: 50;
+  display: flex; flex-direction: column; align-items: flex-end; gap: .4rem;
+}
+.camera-debug img {
+  width: 320px; max-width: 40vw; aspect-ratio: 1; object-fit: contain;
+  background: #000; border: 2px solid #3a3a46; border-radius: .5rem;
+}
+.camera-debug .camera-error {
+  width: 320px; max-width: 40vw; padding: 1rem; text-align: center;
+  background: var(--panel); border: 2px solid #3a3a46; border-radius: .5rem;
+  color: var(--muted);
+}
+.camera-debug button {
+  background: #2c2c38; border: 1px solid #3a3a46; color: var(--text);
+  padding: .45rem .9rem; border-radius: .45rem; font-size: .9rem; cursor: pointer;
 }
 .banner.human { color: #7fd47f; }
 .banner.robot { color: var(--accent); }
@@ -153,3 +190,136 @@ aside h3 { font-size: .85rem; color: var(--muted); text-transform: uppercase; ma
 .mini-square.on { background: #e33; }
 .conflict-list { color: #f2a33c; font-size: .85rem; }
 .status-dump { font-size: .7rem; color: var(--muted); max-height: 18rem; overflow: auto; }
+
+/* ---------------------------------------------- Menú lateral de navegación */
+/* Espejo de app/api/nav.py: mismos destinos y paleta que las páginas de
+   herramientas del backend. En el kiosk arranca plegado (ver SideNav.jsx). */
+:root { --nav-w: 208px; }
+html.nav-collapsed { --nav-w: 54px; }
+
+#sidenav {
+  position: fixed; top: 0; left: 0; bottom: 0; width: var(--nav-w);
+  background: #15151b; border-right: 1px solid #2c2c36; z-index: 900;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+#sidenav .nav-head {
+  display: flex; align-items: center; gap: .5rem; padding: .8rem .6rem;
+  border-bottom: 1px solid #2c2c36; white-space: nowrap;
+}
+#sidenav .nav-title { font-weight: 600; font-size: .95rem; }
+#sidenav .nav-toggle {
+  background: transparent; border: 0; color: var(--muted); cursor: pointer;
+  font-size: 1.15rem; line-height: 1; padding: .35rem .45rem; border-radius: 6px;
+}
+#sidenav .nav-toggle:hover { background: #24242e; color: var(--text); }
+#sidenav nav { display: flex; flex-direction: column; padding: .5rem .4rem; gap: .15rem; }
+#sidenav a {
+  display: flex; align-items: center; gap: .65rem; padding: .55rem .5rem;
+  border-radius: 7px; color: #c9c9d4; text-decoration: none; white-space: nowrap;
+  border-left: 3px solid transparent;
+}
+#sidenav a:hover { background: #24242e; color: #fff; }
+#sidenav a.active { background: #23334a; color: #fff; border-left-color: var(--accent); }
+#sidenav .nav-icon { flex: 0 0 1.5rem; text-align: center; font-size: 1.1rem; line-height: 1; }
+#sidenav .nav-label { display: flex; flex-direction: column; min-width: 0; }
+#sidenav .nav-label b { font-weight: 600; font-size: .92rem; }
+#sidenav .nav-label span { font-size: .72rem; color: #8b8b99; }
+html.nav-collapsed #sidenav .nav-label,
+html.nav-collapsed #sidenav .nav-title { display: none; }
+html.nav-collapsed #sidenav .nav-head { justify-content: center; padding: .8rem 0; }
+
+/* El contenido del kiosk se corre para dejar lugar al menú fijo. */
+.app { padding-left: calc(var(--nav-w) + 1.5rem); }
+
+/* Demo robot vs robot: botón de inicio secundario y botón para detenerla */
+.or-divider {
+  display: flex; align-items: center; gap: .6rem; color: var(--muted);
+  font-size: .85rem; margin-top: .2rem;
+}
+.or-divider::before, .or-divider::after {
+  content: ''; flex: 1; border-top: 1px solid #3a3a46;
+}
+.demo-button {
+  background: #2c2c38; border: 2px solid var(--accent); color: var(--text);
+  font-size: 1.1rem; font-weight: 600; padding: .7rem; border-radius: .6rem;
+  cursor: pointer;
+}
+.demo-button:hover { background: #353545; }
+.demo-button:disabled { opacity: .4; cursor: default; }
+.stop-demo {
+  font-size: 1.1rem; font-weight: 700; padding: .5rem 1.2rem;
+  border-radius: .6rem; border: 2px solid #a33a3a; cursor: pointer;
+  background: #5a2323; color: #fff;
+}
+.stop-demo:disabled { opacity: .45; cursor: default; }
+
+/* Voz del robot: cara fija abajo a la derecha y globo de diálogo grande.
+   z-index por encima de las pantallas de inicio/fin (5) y del panel (10). */
+.robot-corner {
+  position: fixed; right: 1.5rem; bottom: 1.2rem; z-index: 20;
+  display: flex; align-items: flex-end; gap: .8rem; pointer-events: none;
+}
+.robot-face { width: 9rem; height: 9rem; filter: drop-shadow(0 6px 16px rgba(0,0,0,.5)); }
+.robot-corner.talking .robot-face { animation: face-bob .6s ease-in-out infinite alternate; }
+@keyframes face-bob { from { transform: translateY(0) rotate(-2deg); } to { transform: translateY(-4px) rotate(2deg); } }
+.robot-face .blink { opacity: 0; animation: blink 4.5s infinite; }
+@keyframes blink { 0%, 96%, 100% { opacity: 0; } 97%, 99% { opacity: 1; } }
+.robot-face .talking { transform-origin: 60px 89px; animation: talk .18s ease-in-out infinite alternate; }
+@keyframes talk { from { transform: scaleY(.35); } to { transform: scaleY(1.15); } }
+.robot-face .antenna { animation: antenna 1.4s ease-in-out infinite; }
+@keyframes antenna { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
+.robot-face .zzz { animation: zzz 2s ease-in-out infinite; }
+@keyframes zzz { from { opacity: .3; transform: translateY(0); } to { opacity: 1; transform: translateY(-6px); } }
+
+.speech-bubble {
+  position: relative; max-width: min(30rem, 42vw); margin-bottom: 2.4rem;
+  background: #fff; color: #14141a; font-size: 1.7rem; font-weight: 700; line-height: 1.25;
+  padding: 1rem 1.3rem; border-radius: 1.2rem; box-shadow: 0 10px 30px rgba(0,0,0,.55);
+  transform-origin: bottom right; animation: bubble-in .28s cubic-bezier(.2, 1.4, .4, 1);
+}
+.speech-bubble::after {
+  content: ''; position: absolute; right: -.8rem; bottom: 1rem;
+  border: .8rem solid transparent; border-left-color: #fff; border-right: 0;
+}
+@keyframes bubble-in { from { opacity: 0; transform: scale(.5) translateY(1rem); } to { opacity: 1; transform: none; } }
+
+/* Abandonar la partida: botón discreto en el banner + confirmación */
+.resign-button {
+  font-size: 1rem; font-weight: 600; padding: .45rem .9rem; border-radius: .6rem;
+  background: transparent; border: 1px solid #565664; color: var(--muted); cursor: pointer;
+}
+.resign-button:hover { border-color: #a33a3a; color: #f2a33c; }
+.pause-button {
+  font-size: 1rem; font-weight: 600; padding: .45rem .9rem; border-radius: .6rem;
+  background: transparent; border: 1px solid #8a7a2e; color: #e8d44d; cursor: pointer;
+}
+.pause-button:hover { border-color: #e8d44d; }
+.pause-button:disabled { opacity: .4; cursor: default; }
+.pause-card { text-align: center; align-items: center; }
+.pause-card .resign-button { margin-top: .4rem; }
+.choice-card { text-align: center; align-items: center; }
+.choice-card .choice-button {
+  width: 100%; background: #1c6fb8; font-size: 1.6rem; letter-spacing: .04em;
+}
+.choice-card .choice-button:active { background: #2f9e44; }
+
+.resign-card { text-align: center; align-items: center; }
+.resign-confirm {
+  background: #5a2323; border: 2px solid #a33a3a; color: #fff;
+  font-size: 1.05rem; font-weight: 700; padding: .6rem 1.2rem;
+  border-radius: .6rem; cursor: pointer;
+}
+.resign-confirm:disabled { opacity: .45; cursor: default; }
+
+/* Reloj del jugador en el banner */
+.game-clock {
+  font-variant-numeric: tabular-nums; font-size: 1.6rem; font-weight: 700;
+  color: var(--text); background: #14141a; border: 1px solid #3a3a46;
+  border-radius: .5rem; padding: .1rem .7rem; white-space: nowrap;
+}
+.game-clock.paused { opacity: .45; }
+.game-clock.warn { color: #e8d44d; border-color: #7d7433; }
+.game-clock.danger { color: #ff6a5e; border-color: #a33a3a; animation: clock-blink 1s step-start infinite; }
+@keyframes clock-blink { 50% { opacity: .4; } }
+.time-row { grid-template-columns: repeat(4, 1fr); }
+.personality-row { grid-template-columns: repeat(2, 1fr); }

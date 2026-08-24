@@ -1,4 +1,5 @@
 from .detector import (
+    DetectionAmbiguity,
     DetectionError,
     DetectionResult,
     DetectorPhase,
@@ -6,6 +7,7 @@ from .detector import (
 )
 
 __all__ = [
+    "DetectionAmbiguity",
     "DetectionError",
     "DetectionResult",
     "DetectorPhase",

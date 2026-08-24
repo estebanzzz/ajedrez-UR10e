@@ -38,9 +38,12 @@ class CalibrationData:
     )
     motion: MotionParams = field(default_factory=MotionParams)
     robot_host: str = "192.168.1.10"
+    # Posición de espera del brazo (turno humano). None → se deriva de la
+    # bandeja de capturas.
+    park: Point3 | None = None
 
     def to_dict(self) -> dict:
-        return {
+        result = {
             "robot_host": self.robot_host,
             "board": {
                 corner: asdict(getattr(self.board, corner))
@@ -54,6 +57,9 @@ class CalibrationData:
             },
             "motion": asdict(self.motion),
         }
+        if self.park is not None:
+            result["park"] = asdict(self.park)
+        return result
 
     @classmethod
     def from_dict(cls, data: dict) -> "CalibrationData":
@@ -79,6 +85,7 @@ class CalibrationData:
             },
             motion=MotionParams(**data["motion"]),
             robot_host=data.get("robot_host", "192.168.1.10"),
+            park=point(data["park"]) if "park" in data else None,
         )
 
 

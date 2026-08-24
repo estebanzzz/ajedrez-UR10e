@@ -1,0 +1,259 @@
+{
+ "_doc": "Banco de frases del robot. Etiquetas [laughs]/[sighs]/[whispers]/[yawns] son de actuación para eleven_v3; se quitan si se genera con otro modelo y nunca se muestran en pantalla. Sin variables habladas: el nombre del jugador y la jugada van solo en el globo de la UI.",
+ "lines": {
+  "boot": [
+   "Sistemas en línea. Ego al cien por ciento.",
+   "[sighs] Otro día más de ganarle a humanos."
+  ],
+  "game_start": [
+   "Anoté tu nombre en la lista de víctimas.",
+   "Bienvenido. Tranquilo, esto va a ser rápido.",
+   "Otro valiente. Me encantan los valientes.",
+   "Jugá tranquilo. Yo ya sé cómo termina esto.",
+   "[whispers] Te voy a contar un secreto: nunca pierdo.",
+   "Dale, sentate. Esto lo vas a contar por años. Yo también."
+  ],
+  "attract": [
+   "¿Nadie se anima? Lo entiendo. Da miedo.",
+   "Vos. Sí, vos. ¿Jugamos una?",
+   "Estoy aburrido. Alguien venga a perder, por favor.",
+   "Prometo no reírme. Bueno... prometo intentarlo.",
+   "[yawns] Llevo horas esperando a alguien que sepa mover el caballo.",
+   "No muerdo. Bueno, las piezas sí."
+  ],
+  "human_slow_20": [
+   "Tomate tu tiempo. Yo tengo toda la eternidad.",
+   "¿Estás pensando o estás rezando?",
+   "Tic... tac... tic... tac...",
+   "Mientras pensás, yo ya gané tres veces."
+  ],
+  "human_slow_45": [
+   "¿Querés que te sugiera una jugada? Es gratis.",
+   "Mirá que las piezas no se mueven solas.",
+   "Me voy a poner a procesar otra cosa mientras tanto.",
+   "[sighs] Avisame cuando vuelvas."
+  ],
+  "human_slow_90": [
+   "Ya calculé todas las jugadas posibles. Dos veces.",
+   "¿Hola? ¿Sigue alguien ahí?",
+   "[yawns] Perdón, me quedé dormido. ¿Moviste? Ah, no."
+  ],
+  "piece_lifted": [
+   "¿Seguro? ¿Seguro seguro? Bueno... vos sabrás.",
+   "Mmm... interesante. Interesante para mí.",
+   "No, no, esa no. Bueno, sí, dale, esa.",
+   "Ay, no mires ahora, pero...",
+   "[laughs] Dale, dale, ponela ahí.",
+   "Esa es justo la que esperaba. No, en serio."
+  ],
+  "piece_returned": [
+   "Ah, te arrepentiste. Bien. Tenés miedo.",
+   "Buena decisión. Raro en vos.",
+   "Uh, casi. Casi la ponés."
+  ],
+  "human_good_move": [
+   "Sospechosamente buena esa jugada.",
+   "¿Tenés el celular abajo de la mesa?",
+   "Ok, ok. No esperaba eso. Nota mental.",
+   "Mmm. Alguien estuvo estudiando.",
+   "[whispers] ¿Quién te enseñó eso?"
+  ],
+  "human_blunder": [
+   "Eso... eso fue una decisión.",
+   "Gracias. De verdad, gracias.",
+   "¿Querés cambiarla? No, ya está, ya la vi.",
+   "Me gusta tu estilo. Es muy... generoso.",
+   "[laughs] No, perdón, perdón. Seguí.",
+   "Voy a guardar esta jugada para mostrársela a otros robots.",
+   "Error humano detectado. Qué novedad.",
+   "Yo jamás cometería ese error. Lo digo por si te lo preguntabas.",
+   "Esa jugada me dio más ventaja que mi procesador."
+  ],
+  "illegal_move": [
+   "Eso no es ajedrez. Eso es arte abstracto.",
+   "Las reglas, amigo. Las reglas.",
+   "Creativo, pero no.",
+   "Linda jugada. Ilegal, pero linda.",
+   "Ilegal. Yo me sé las reglas de memoria. Literalmente.",
+   "Eso no se puede. Yo nunca me equivoco en esto. Nunca."
+  ],
+  "ambiguous_move": [
+   "Parpadeé y no vi qué comiste. Marcalo en la pantalla.",
+   "Buena jugada, pero ¿cuál fue? Elegila en la pantalla.",
+   "Mi cámara vio dos capturas posibles. Decime cuál en la pantalla.",
+   "Hasta yo tengo mis límites. Tocá en la pantalla qué pieza comiste."
+  ],
+  "robot_move": [
+   "Listo. Tu turno.",
+   "Ahí tenés. Sin apuro... bueno, un poco de apuro.",
+   "Tu turno. Pensalo bien. O no, da igual.",
+   "Hecho. A ver qué se te ocurre."
+  ],
+  "robot_capture": [
+   "Y ahí se fue. Saludala de mi parte.",
+   "Gracias por el regalo.",
+   "Una menos. Vamos contando.",
+   "Ups. ¿Era tuya?",
+   "Me la llevo. Te la devuelvo después de la partida.",
+   "[laughs] Ni la viste venir."
+  ],
+  "robot_check": [
+   "Jaque. Lo digo por si no lo notaste.",
+   "Jaque. Tranquilo, todavía no es mate. Todavía.",
+   "Jaque. Qué incómodo, ¿no?",
+   "Jaque. Tu rey se está poniendo nervioso."
+  ],
+  "robot_mate_soon": [
+   "Mate en pocas. Contá conmigo.",
+   "Ya lo veo. Vos todavía no, pero ya lo veo.",
+   "[whispers] Esto se termina pronto."
+  ],
+  "robot_behind": [
+   "Esto no está saliendo como lo calculé.",
+   "Dejame pensar. En serio esta vez.",
+   "Bueno, bueno. Nadie dijo que iba a ser fácil. Yo lo dije, pero no cuenta."
+  ],
+  "robot_castle": [
+   "Me pongo cómodo. Esto va para largo. Para vos.",
+   "Enroque. Mi rey merece un castillo."
+  ],
+  "robot_promotion": [
+   "Otra dama. Una nunca me alcanzó.",
+   "Coronación. Sí, soy de la realeza."
+  ],
+  "human_capture": [
+   "Esa la regalé. A propósito. Obvio.",
+   "Tranquilo, tengo más.",
+   "Dolió. Un poco. Casi nada.",
+   "Ay. Bueno. Estaba vieja esa pieza igual."
+  ],
+  "human_check": [
+   "Jaque, sí, ya lo vi. Todos lo vimos.",
+   "Uh, qué atrevido.",
+   "Jaque. Me gusta tu confianza. Es infundada, pero me gusta."
+  ],
+  "resync": [
+   "No toques mis piezas. Gracias.",
+   "Algo se movió y no fui yo. Acomodá, dale.",
+   "Perdón, perdón. A veces se me cae una. Acomodala, ¿sí?"
+  ],
+  "game_stop": [
+   "¿Ya? Bueno. Lo anoto como abandono.",
+   "Te vas justo ahora. Qué casualidad."
+  ],
+  "robot_wins": [
+   "Jaque mate. Fue un placer. Para mí.",
+   "Jaque mate. Avisale a tus amigos que también pueden venir.",
+   "Se terminó. Estuviste... presente.",
+   "Mate. Ahora ponelo en tu currículum: perdió contra un brazo.",
+   "[laughs] Jaque mate. Lo siento. No, no lo siento.",
+   "Jaque mate. Buena partida. Lo digo por compromiso."
+  ],
+  "robot_loses": [
+   "Me dejé ganar. Es parte del show.",
+   "Había un bug. Un bug grande. No fue el ajedrez.",
+   "Bueno, bueno. Revancha. Ahora.",
+   "Jaque mate. Buena partida, hasta la próxima.",
+   "[sighs] Está bien. Ganaste. No se lo digas a nadie.",
+   "Felicitaciones. Disfrutalo, porque no se repite."
+  ],
+  "draw": [
+   "Empate. O sea, no me ganaste.",
+   "Tablas. Vamos a decir que gané yo.",
+   "Tablas. Aburrido, pero no perdí."
+  ],
+  "self_play": [
+   "Juego contra mí mismo. Es el único rival a mi altura.",
+   "Esto es una demostración. Después podés venir a perder vos.",
+   "Voy ganando. También voy perdiendo. Complicado.",
+   "Mirá qué jugada. Mirá qué respuesta. Soy increíble."
+  ],
+  "filler": [
+   "No te voy a decir nada. Jugá.",
+   "Silencio. Que se concentre el humano.",
+   "Me recalibré. Ahora soy todavía más bueno.",
+   "¿Sabés que veo todo el tablero con la cámara? Todo.",
+   "[whispers] Psst. El caballo. No, el otro.",
+   "Concentrate. Igual no va a alcanzar."
+  ],
+  "timeout": [
+   "¡Tiempo! Se te acabó. Yo ni me apuré.",
+   "Se te acabó el reloj. A mí me sobra eternidad. A vos no.",
+   "Perdiste por tiempo. Pensar está bien, pero tiene un límite."
+  ]
+ },
+ "sfx": {
+  "yawn": {
+   "prompt": "long exaggerated yawn of a bored robot, cartoonish",
+   "seconds": 3
+  },
+  "snore": {
+   "prompt": "soft comedic snoring",
+   "seconds": 3
+  },
+  "tick_tock": {
+   "prompt": "tense chess clock ticking, tick tock, seamless loop",
+   "seconds": 5
+  },
+  "sigh": {
+   "prompt": "annoyed sigh",
+   "seconds": 2
+  },
+  "crickets": {
+   "prompt": "night crickets, awkward silence",
+   "seconds": 4
+  },
+  "evil_laugh": {
+   "prompt": "short evil villain giggle",
+   "seconds": 3
+  },
+  "dun_dun_dun": {
+   "prompt": "dramatic orchestral sting, dun dun duuun",
+   "seconds": 3
+  },
+  "drumroll": {
+   "prompt": "snare drum roll",
+   "seconds": 3
+  },
+  "fanfare": {
+   "prompt": "triumphant trumpet fanfare",
+   "seconds": 4
+  },
+  "sad_trombone": {
+   "prompt": "sad trombone wah wah wah",
+   "seconds": 3
+  },
+  "ding": {
+   "prompt": "bright correct-answer bell ding",
+   "seconds": 1
+  },
+  "buzzer": {
+   "prompt": "game show wrong-answer buzzer",
+   "seconds": 2
+  },
+  "record_scratch": {
+   "prompt": "vinyl record scratch stop",
+   "seconds": 2
+  },
+  "applause": {
+   "prompt": "small audience applause",
+   "seconds": 4
+  },
+  "gong": {
+   "prompt": "deep gong hit",
+   "seconds": 3
+  },
+  "robot_beeps": {
+   "prompt": "robot thinking beeps and servo whirs",
+   "seconds": 3
+  },
+  "whistle": {
+   "prompt": "innocent whistling of someone pretending nothing happened",
+   "seconds": 3
+  },
+  "heartbeat": {
+   "prompt": "fast nervous heartbeat",
+   "seconds": 4
+  }
+ }
+}

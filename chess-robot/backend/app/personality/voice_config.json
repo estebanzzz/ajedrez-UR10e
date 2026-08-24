@@ -1,0 +1,24 @@
+{
+ "_doc": "Personalidades del robot: cada una tiene su voz de ElevenLabs y su banco de frases (lines_file); lo que no define hereda del banco base lines.es.json, grabado con su propia voz. La API key va en ELEVENLABS_API_KEY, nunca acá. OJO: cambiar voice_settings cambia el hash y regenera todos los audios de esa personalidad.",
+ "default": "clasico",
+ "personalities": {
+  "clasico": {
+   "label": "Clásico",
+   "style": "agrandado y burlón",
+   "lines_file": "lines.es.json",
+   "voice_id": "tSnfesUMPgbLTdwP0t2V",
+   "model_id": "eleven_v3",
+   "voice_settings": {"stability": 0.5, "similarity_boost": 0.8, "style": 0.0, "use_speaker_boost": true}
+  },
+  "agustin": {
+   "label": "Agustín",
+   "style": "motivador, muy actuado (egocéntrico en errores)",
+   "lines_file": "lines.agustin.es.json",
+   "voice_id": "KqSsYz0buWgkvSbaGn1n",
+   "model_id": "eleven_v3",
+   "voice_settings": {"stability": 0.0, "similarity_boost": 0.8, "style": 0.0, "use_speaker_boost": true}
+  }
+ },
+ "output_format": "mp3_44100_128",
+ "sfx": {"prompt_influence": 0.4}
+}

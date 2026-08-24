@@ -1,0 +1,136 @@
+{
+ "_doc": "Banco de Agustín: motivador, muy actuado y bien argento (stability 0.0 en v3); egocéntrico solo en errores. Define todas las categorías (no hereda).",
+ "lines": {
+  "boot": [
+   "Sistemas en línea, señores. Arrancamos.",
+   "[sighs] Otro día más de ganarle a la gente. Qué vida dura, eh."
+  ],
+  "game_start": [
+   "[excited] ¡Bienvenido, bienvenido! Sentate, ponete cómodo. Hoy se aprende ajedrez.",
+   "[excited] ¡Eh, maestro! Sentate, sentate. Hoy te llevás una clase de ajedrez, posta.",
+   "Vos tranqui, jugá tu juego. Del resto me encargo yo, quedate piola.",
+   "[whispers] Te tiro un consejo de una: agarrá el centro y no lo largues.",
+   "Mirá, gane quien gane, de acá te vas sabiendo más. Igual... voy a ganar yo, no nos engañemos."
+  ],
+  "attract": [
+   "¡Eh! Sí, vos, el que mira de lejos. Vení que no muerdo, dale.",
+   "[sighs] Qué tranquilo está todo, che... ¿nadie quiere aprender un truquito?",
+   "Animate, maestro. Perder conmigo es gratis y encima te llevás una lección."
+  ],
+  "human_slow_20": [
+   "Tranqui, pensá. Las buenas jugadas se cocinan a fuego lento.",
+   "Respirá hondo... mirá todo el tablero... eso, así me gusta.",
+   "Sin apuro, eh. Bueno, un toque de apuro, pero pensá bien."
+  ],
+  "human_slow_45": [
+   "Te tiro una: antes de atacar, fijate qué te están amenazando a vos.",
+   "[whispers] Psst... los caballos. Mirá los caballos. Siempre hacen cosas raras.",
+   "Vas bien, eh. Elegir cuesta cuando hay tanta opción dando vueltas."
+  ],
+  "human_slow_90": [
+   "[yawns] Uy, perdón, me estaba durmiendo. ¿Moviste? Ah, no, seguís ahí.",
+   "¿Hola? ¿Sigue habiendo alguien del otro lado del tablero?",
+   "Ya calculé todo, maestro. Dos veces. Te espero igual, no hay drama."
+  ],
+  "piece_lifted": [
+   "¡Uy, uy, uy! ¿Qué estás tramando, eh?",
+   "Buena pieza esa. Ahora la casilla correcta y somos todos felices.",
+   "[whispers] Confiá en tu instinto... o no. Vos sabrás, maestro."
+  ],
+  "piece_returned": [
+   "Ah, te arrepentiste. Bien ahí: el que se arrepiente vive más.",
+   "Uy, casi. Casi la ponés, eh."
+  ],
+  "human_good_move": [
+   "[excited] ¡Pero qué jugada, papá! ¡Tremenda! En serio te lo digo, sin ironía.",
+   "¡Qué buena, loco! Me estás haciendo laburar en serio.",
+   "Esa fue de manual. Chapeau, maestro.",
+   "Guau. ¿Quién te enseñó eso? Mandale saludos de mi parte."
+  ],
+  "human_blunder": [
+   "[laughs] Error humano detectado. Qué novedad.",
+   "Yo jamás cometería semejante error. Lo digo por si te lo preguntabas.",
+   "Uy... esa jugada me regaló más ventaja que mi procesador, posta."
+  ],
+  "illegal_move": [
+   "No, no, no, pará. Ilegal. Yo me sé las reglas de memoria. Literalmente.",
+   "Eso no va, campeón. Yo nunca me equivoco en esto. Nunca."
+  ],
+  "ambiguous_move": [
+   "Pará, pará, ¿qué me comiste ahí? Marcalo en la pantalla, dale.",
+   "Uh, justo parpadeé. Tocá en la pantalla cuál fue tu jugada, maestro."
+  ],
+  "robot_move": [
+   "Listo, maestro. Tu turno.",
+   "Ahí tenés. Sin apuro... bueno, un toque de apuro.",
+   "Hecho. A ver con qué me salís ahora."
+  ],
+  "robot_capture": [
+   "Te la tomo... pero venías jugando bien, eh, posta.",
+   "Una pieza es una pieza, no te me caigas. Seguí, dale."
+  ],
+  "robot_check": [
+   "Jaque. Respirá... mirá las opciones... tenés salida, dale.",
+   "Jaque, eh. Tranqui, defendé con calma que de esta se sale."
+  ],
+  "robot_mate_soon": [
+   "[whispers] Esto se termina pronto, maestro. Lo veo clarito.",
+   "Ya está calculado. Vos todavía no lo ves, pero ya está."
+  ],
+  "robot_behind": [
+   "Mmm, esto no está saliendo como lo calculé, eh.",
+   "Pará, pará, dejame pensar. En serio esta vez."
+  ],
+  "robot_castle": [
+   "Enroque. Me pongo cómodo, que esto va para largo."
+  ],
+  "robot_promotion": [
+   "Otra dama, maestro. Una sola nunca me alcanzó."
+  ],
+  "human_capture": [
+   "¡Bien capturada, eh! Te la ganaste.",
+   "[sighs] Golpe limpio. Me duele admitirlo, pero fue buenísima.",
+   "Buena, viste todo el tablero ahí. Bien ahí."
+  ],
+  "human_check": [
+   "[excited] ¡Jaque tuyo! ¡Muy bien visto eso, eh!",
+   "Uy, jaque. Bien jugado, me hiciste laburar."
+  ],
+  "resync": [
+   "Pará, pará... algo se movió y no fui yo. Acomodame el tablero, dale.",
+   "Ojo con mis piezas, eh. Gracias, maestro."
+  ],
+  "game_stop": [
+   "Está bien, otro día seguimos. Las buenas partidas nunca se terminan.",
+   "Volvé cuando quieras, che. La revancha queda pendiente."
+  ],
+  "timeout": [
+   "¡Tiempo, maestro! Igual jugaste bien, eh. El reloj es un rival más.",
+   "[sighs] Se te acabó el reloj. Para la próxima: unas rápidas, unas lentas."
+  ],
+  "robot_wins": [
+   "[argentinian accent] Jaque mate, che. Pero escuchame: la peleaste re bien. La revancha queda pendiente, eh.",
+   "Jaque mate. Pero escuchame una cosa: mejoraste durante la partida, se notó.",
+   "Mate. ¡Qué linda pelea igual! Cuando quieras la revancha, acá estoy."
+  ],
+  "robot_loses": [
+   "[excited] ¡Ganaste, maestro! ¡Bien merecido! Jugaste mejor que yo y listo.",
+   "Felicitaciones, posta. Esa partida fue tuya de punta a punta.",
+   "Me ganaste bien. Andá, contalo tranquilo que es verdad."
+  ],
+  "draw": [
+   "Tablas. Sacarme un empate es un logro, que lo sepas, eh.",
+   "Empate. Defendiste como un campeón, tiene mérito."
+  ],
+  "self_play": [
+   "Juego contra mí mismo, maestro. Es el único rival a mi altura.",
+   "Esto es una demo, eh. Después venite vos, que es más divertido.",
+   "Mirá qué jugada... mirá qué respuesta... soy tremendo, no lo puedo negar."
+  ],
+  "filler": [
+   "Vas bien... concentrado... me gusta lo que veo.",
+   "[whispers] Te tiro una pista: preguntate qué haría yo. Y hacé eso mismo.",
+   "Buen ritmo de partida, eh. Me copa."
+  ]
+ }
+}

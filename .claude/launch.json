@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "backend-vision",
+      "runtimeExecutable": "C:\\proyectos\\Robot Ajedrez\\chess-robot\\backend\\.venv\\Scripts\\python.exe",
+      "runtimeArgs": [
+        "C:\\proyectos\\Robot Ajedrez\\chess-robot\\backend\\run_vision.py"
+      ],
+      "port": 8000
+    },
+    {
+      "name": "backend-mock",
+      "runtimeExecutable": "C:\\proyectos\\Robot Ajedrez\\chess-robot\\backend\\.venv\\Scripts\\python.exe",
+      "runtimeArgs": [
+        "-m",
+        "uvicorn",
+        "app.api.server:app",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8001",
+        "--app-dir",
+        "C:\\proyectos\\Robot Ajedrez\\chess-robot\\backend"
+      ],
+      "port": 8001
+    }
+  ]
+}

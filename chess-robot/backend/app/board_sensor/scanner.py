@@ -62,6 +62,10 @@ class BoardScanner:
         with self._lock:
             return self._latest
 
+    def set_stable_reads(self, stable_reads: int) -> None:
+        """Cambia el debounce en caliente (ajuste desde la UI)."""
+        self._debouncer.set_stable_reads(stable_reads)
+
     def subscribe(self, callback: BitmapCallback) -> None:
         with self._lock:
             self._subscribers.append(callback)

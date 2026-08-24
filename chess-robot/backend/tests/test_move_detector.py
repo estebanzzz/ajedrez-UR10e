@@ -8,7 +8,13 @@ import chess
 import pytest
 
 from app.board_sensor.bitmap import bitmap_from_squares
-from app.move_detector import DetectionError, DetectionResult, DetectorPhase, MoveDetector
+from app.move_detector import (
+    DetectionAmbiguity,
+    DetectionError,
+    DetectionResult,
+    DetectorPhase,
+    MoveDetector,
+)
 from app.simulator.sim_sensor import snapshots_for_move
 
 
@@ -169,14 +175,17 @@ def test_ambiguous_captures_resolved_by_intermediate_states():
         assert result.move == move
 
 
-def test_ambiguous_captures_without_intermediates_is_error():
+def test_ambiguous_captures_without_intermediates_returns_candidates():
+    """Sin estado intermedio la jugada NO es ilegal: se devuelven las
+    candidatas para que el humano elija en la UI (caso real: Nxh7/Nxf7 con
+    la mano ocluyendo el destino durante el cambio de piezas)."""
     board = _two_capture_board()
     detector = MoveDetector(board)
     # Los sensores solo entregan el bitmap final (se perdió el estado intermedio).
     detector.update(board.occupied & ~(1 << chess.D4))
     result = detector.confirm()
-    assert isinstance(result, DetectionError)
-    assert "ambigua" in result.message
+    assert isinstance(result, DetectionAmbiguity)
+    assert {m.uci() for m in result.candidates} == {"d4d6", "d4f6"}
 
 
 # ------------------------------------------------------- errores y resync

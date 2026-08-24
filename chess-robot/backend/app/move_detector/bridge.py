@@ -15,6 +15,7 @@ import chess
 from app.board_sensor.bitmap import Bitmap
 from app.board_sensor.scanner import BoardScanner
 from app.move_detector.detector import (
+    DetectionAmbiguity,
     DetectionError,
     DetectionResult,
     DetectorPhase,
@@ -60,7 +61,7 @@ class SensorDetectorBridge:
                 self._scanner.unsubscribe(self._on_bitmap)
                 self._active = False
 
-    def confirm(self) -> DetectionResult | DetectionError:
+    def confirm(self) -> DetectionResult | DetectionError | DetectionAmbiguity:
         """Botón de confirmación pulsado: resolver la jugada y dejar de escuchar."""
         with self._lock:
             result = self._detector.confirm()

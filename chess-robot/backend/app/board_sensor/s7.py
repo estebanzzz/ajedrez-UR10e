@@ -204,6 +204,11 @@ def open_s7(
 PHASE_STATUS_CODES = {
     "idle": STATUS_IDLE,
     "human_turn": STATUS_HUMAN_TURN,
+    # Elegir la captura en pantalla sigue siendo acción del humano (no es
+    # un error del tablero): misma baliza que su turno.
+    "human_choice": STATUS_HUMAN_TURN,
+    # Pausa de emergencia: amarillo — situación que requiere atención.
+    "paused": STATUS_ERROR,
     "human_error": STATUS_ERROR,
     "robot_turn": STATUS_ROBOT_MOVING,
     "resync": STATUS_ERROR,

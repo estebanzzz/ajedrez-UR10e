@@ -101,3 +101,32 @@ def test_websocket_streams_initial_and_changes():
             update = ws.receive_json()
             assert update["bitmap"] == FULL_START_BITMAP & ~(1 << chess.E2)
             assert "e2" not in update["squares"]
+
+
+def test_self_play_mode_via_api():
+    with make_client() as client:
+        # La demo exige la posición inicial: esperar a que el scanner la lea.
+        wait_for_bitmap(client, FULL_START_BITMAP)
+        status = client.post("/api/game/new", json={"mode": "self_play"}).json()
+        assert status["mode"] == "self_play"
+        assert status["phase"] in ("robot_turn", "game_over")
+
+        # El robot (simulado) juega solo: el historial crece sin confirmar nada.
+        import time
+
+        deadline = time.monotonic() + 5.0
+        while time.monotonic() < deadline:
+            status = client.get("/api/game/state").json()
+            if len(status["san_history"]) >= 2 or status["phase"] == "game_over":
+                break
+            time.sleep(0.05)
+        assert len(status["san_history"]) >= 2 or status["phase"] == "game_over"
+
+        # El botón de confirmación no aplica en la demo.
+        assert client.post("/api/game/confirm").json()["last_error"] is not None
+
+        status = client.post("/api/game/stop").json()
+        assert status["phase"] == "idle"
+        assert status["mode"] == "human"
+
+        assert client.post("/api/game/new", json={"mode": "torneo"}).status_code == 422

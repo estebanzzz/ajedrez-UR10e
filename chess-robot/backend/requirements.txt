@@ -3,3 +3,7 @@ fastapi>=0.111
 uvicorn[standard]>=0.30
 pytest>=8.0
 httpx>=0.27  # TestClient de FastAPI
+numpy>=1.26
+opencv-python>=4.9  # visión artificial: detección de piezas por cámara
+pypylon>=3.0        # cámara Basler (adquisición vía pylon)
+paho-mqtt>=2.0      # telemetría hacia Neuronal HUB (supervisión de la feria)

@@ -52,3 +52,19 @@ def test_reset():
     game.reset()
     assert game.expected_bitmap == chess.Board().occupied
     assert game.san_history == []
+
+
+def test_claim_draw_only_when_enabled():
+    from app.game_state import GameState
+
+    game = GameState()
+    for _ in range(2):
+        for uci in ["g1f3", "g8f6", "f3g1", "f6g8"]:
+            game.apply_move(chess.Move.from_uci(uci))
+    # Tres veces la posición inicial: sin reclamo, la partida sigue.
+    assert game.outcome() is None
+    game.claim_draw = True
+    outcome = game.outcome()
+    assert outcome is not None
+    assert outcome.termination == "THREEFOLD_REPETITION"
+    assert outcome.winner is None

@@ -2,7 +2,7 @@
 
 ## 1. Resumen
 
-Sistema demostrativo para exposición en el que un robot colaborativo **Universal Robots UR10e** juega al ajedrez contra un humano sobre un tablero físico sensorizado. El control central es una **Raspberry Pi 5**, que ejecuta el motor de ajedrez, lee la matriz de sensores del tablero, comanda el robot y la garra **Robotiq**, y sirve una interfaz gráfica en pantalla para el público con tablero virtual y evaluación de la partida en tiempo real.
+Sistema demostrativo para exposición en el que un robot colaborativo **Universal Robots UR10e** juega al ajedrez contra un humano sobre un tablero físico. La detección de piezas es por **visión artificial (cámara cenital + OpenCV)**. El control central es una **Raspberry Pi 5**, que ejecuta el motor de ajedrez, procesa la imagen del tablero, comanda el robot y la garra **Robotiq**, y sirve una interfaz gráfica en pantalla para el público con tablero virtual y evaluación de la partida en tiempo real.
 
 - **Modo de juego:** contra humano, con dificultad ajustable desde la UI.
 - **Piezas capturadas:** el robot las deposita en una bandeja lateral.
@@ -14,24 +14,20 @@ Sistema demostrativo para exposición en el que un robot colaborativo **Universa
 ┌─────────────────────────────────────────────────────┐
 │ Raspberry Pi 5 (Raspberry Pi OS 64-bit)             │
 │  ├── Backend Python (FastAPI + python-chess)        │
+│  ├── OpenCV (detección de piezas por cámara)        │
 │  ├── Stockfish (motor UCI, nivel ajustable)         │
 │  ├── ur_rtde → UR10e (Ethernet)                     │
 │  ├── python-snap7 → S7-1200 (Ethernet, protocolo S7)│
 │  └── Frontend React (kiosk en pantalla HDMI)        │
 └─────────────────────────────────────────────────────┘
-         │ Ethernet                │ Ethernet (S7)
-   ┌─────▼─────┐            ┌──────▼──────────────────┐
-   │ UR10e     │            │ PLC S7-1200 (CPU 1215C) │
-   │ + Robotiq │            │  esclavo de E/S:        │
-   └───────────┘            │  ├── matriz 8x8 (DI/DQ) │
-                            │  ├── botón confirmación │
-                            │  └── baliza/semáforo    │
-                            └──────┬──────────────────┘
-                                   │ 24 V DC
-                            ┌──────▼──────┐
-                            │ Tablero 8x8 │
-                            │ reed + diodo│
-                            └─────────────┘
+    │ USB/CSI       │ Ethernet         │ Ethernet (S7)
+┌───▼──────────┐ ┌──▼────────┐  ┌──────▼──────────────────┐
+│ Cámara       │ │ UR10e     │  │ PLC S7-1200 (CPU 1215C) │
+│ cenital      │ │ + Robotiq │  │  panel de operación:    │
+│ sobre el     │ └───────────┘  │  ├── botón confirmación │
+│ tablero 8x8  │                │  ├── baliza/semáforo    │
+└──────────────┘                │  └── e-stop auxiliar    │
+                                └─────────────────────────┘
 ```
 
 ### 2.1 Robot
@@ -45,13 +41,23 @@ Sistema demostrativo para exposición en el que un robot colaborativo **Universa
 - Alternativa: Modbus RTU directo al conector de herramienta.
 - Parámetros por tipo de pieza: apertura, fuerza (baja, piezas livianas), velocidad.
 
-### 2.3 Tablero sensorizado (vía PLC S7-1200)
-- Matriz 8×8 de sensores **reed** (solo presencia, sin identidad de pieza). Cada pieza lleva imán en la base.
-- **La E/S física la maneja un PLC Siemens S7-1200 (CPU 1215C)** — decisión de exposición: mostrar un PLC en el loop como esclavo de E/S. La matriz se cablea a las DI/DQ onboard (8 salidas de fila + 8 entradas de columna, a 24 V DC), con **diodo por sensor** contra lecturas fantasma.
-- El PLC barre la matriz en un OB cíclico (~5 ms por fila → tablero completo a ~25 Hz) y publica la ocupación en un **DB**; también lee el botón de confirmación y comanda la baliza/semáforo.
-- La Pi lee el DB por Ethernet con **python-snap7** (protocolo S7; requiere PUT/GET habilitado y DB no optimizado). Debounce por software en la Pi (2–3 lecturas estables).
-- Detalle TIA: bajar el filtro de las DI de 6.4 ms a **0.8 ms** para que el barrido funcione. Ver `chess-robot/docs/plc-s7-1200.md`.
-- Alternativa de respaldo (sin PLC): matriz directa a los GPIO de la Pi con `gpiod` (driver `matrix` ya implementado).
+### 2.3 Detección de piezas por visión artificial (OpenCV)
+- **Cámara industrial Basler** cenital fija sobre el tablero, adquisición vía **pylon/pypylon** (SDK oficial de Basler). Montada de forma que vea las 64 casillas sin que el robot la obstruya en reposo.
+- Configuración de cámara recomendada (desde pylon Viewer): **exposición y balance de blancos manuales** (los automáticos cambian la imagen cuando el brazo entra en cuadro y desestabilizan la clasificación), guardados en un **UserSet como startup set** para que la cámara arranque siempre igual.
+- **Sin identidad ni bando por imagen**: la visión clasifica cada casilla en solo **2 clases — vacía / ficha**. Ambos bandos usan fichas **oscuras** sobre el tablero claro (p. ej. azul y gris) y se detectan por el mismo camino de píxeles oscuros, robusto ante la luz. La identidad y el bando (peón, torre…, blanca/negra) se siguen infiriendo por seguimiento de estado en `game_state`, igual que antes.
+- **Pipeline** (clásico, sin deep learning):
+  1. **Calibración de perspectiva**: el operador marca las 4 esquinas del área de juego con clicks → homografía → imagen cenital rectificada, dividida en 64 celdas.
+  2. **Clasificación por casilla**: cada píxel se compara contra el **fondo de su propia celda** (brillo de las 4 esquinas, siempre visibles); una casilla está ocupada si su disco central queda mayormente por debajo del umbral píxel-oscuro **aprendido** en el entrenamiento — señal relativa, inmune al nivel de luz.
+  3. **Oclusión**: si el frame difiere bruscamente del anterior (mano o brazo sobre el tablero), se mantiene el último bitmap estable en lugar de publicar lecturas falsas.
+  4. **Debounce** por software (N lecturas estables), reutilizando el `BoardScanner` existente.
+  5. **Resolución de jugada**: el detector continuo estándar (el mismo de los drivers de presencia) sigue los cambios del bitmap durante el turno humano y resuelve la jugada al confirmar; las casillas tocadas transitoriamente desambiguan capturas. La jugada del robot se verifica con el brazo ya retirado a su **posición de espera** fuera del tablero (sin sombra ni oclusión).
+- **Entrenamiento auto-etiquetado** (diseñado para ser trivial para el operador): se capturan **una tanda de fotos del tablero vacío y una de la posición inicial**. Las etiquetas se conocen solas: 64 casillas vacías en la primera; filas 1–2 y 7–8 con ficha y 3–6 vacías en la segunda. Nada que etiquetar a mano. Re-entrenar tras cambiar iluminación o tablero toma ~1 minuto.
+- El resultado es el **mismo bitmap de ocupación de 64 bits** que producía la matriz de sensores, por lo que `move_detector`, `game_state` y el resto del sistema no cambian.
+- Legado: la matriz 8×8 de reed vía PLC (`s7`) y vía GPIO (`matrix`) queda implementada como respaldo, pero **deja de ser la solución de producción**.
+
+### 2.3.1 PLC S7-1200 (panel de operación)
+- El PLC S7-1200 (CPU 1215C) se conserva en el sistema como **panel de operación**: botón físico de confirmación de jugada, baliza/semáforo y contacto auxiliar del e-stop. Ya no barre la matriz de sensores.
+- La Pi sigue comunicándose por Ethernet con **python-snap7**. Pendiente: adaptar `PanelLink` para funcionar junto al driver de visión (hoy asume que el driver del tablero es el S7).
 
 ### 2.4 Pantalla
 - Monitor HDMI en modo kiosk (Chromium fullscreen) mostrando la UI React.
@@ -71,35 +77,38 @@ Sistema demostrativo para exposición en el que un robot colaborativo **Universa
 | Backend | Python 3.11+, FastAPI, WebSocket |
 | Reglas de ajedrez | `python-chess` |
 | Motor | Stockfish (binario ARM64) vía UCI |
+| Visión (detección de piezas) | OpenCV (`opencv-python`) + numpy; cámara Basler vía `pypylon` |
 | Robot | `ur_rtde` |
-| PLC (E/S tablero) | `python-snap7` → S7-1215C (DB por protocolo S7) |
-| GPIO (respaldo) | `gpiod` (libgpiod v2, barrido de matriz) |
+| PLC (panel: botón/baliza) | `python-snap7` → S7-1215C (DB por protocolo S7) |
+| Tablero legado (respaldo) | matriz reed vía PLC (`s7`) o GPIO (`gpiod`) |
 | Frontend | React + Vite, `react-chessboard`, WebSocket client |
 | Servicio | systemd (arranque automático, watchdog) |
 
 ### 3.2 Módulos del backend
-1. **`board_sensor`** — barrido de la matriz, debounce, publica bitmap 64 bits de ocupación.
-2. **`game_state`** — núcleo del sistema. Mantiene la partida en `python-chess`. Como los sensores solo detectan presencia, **la identidad de cada pieza se infiere por seguimiento de estado**: partiendo de la posición inicial conocida, cada jugada legal actualiza el mapa casilla→pieza.
-3. **`move_detector`** — máquina de estados que interpreta los cambios del bitmap durante el turno humano:
+1. **`vision`** — detección de piezas por cámara: captura, homografía de perspectiva, clasificación de las 64 casillas (vacía/blanca/negra), manejo de oclusión y entrenamiento auto-etiquetado. Expone un `VisionDriver` que implementa la misma interfaz `SensorDriver` que los drivers legados, publicando el bitmap de 64 bits de ocupación.
+2. **`board_sensor`** — infraestructura común de lectura del tablero: bitmap, debounce, `BoardScanner` (hilo de barrido y suscriptores) y los drivers legados de matriz reed (`s7`, `matrix_gpio`, `mock`).
+3. **`game_state`** — núcleo del sistema. Mantiene la partida en `python-chess`. Como la detección solo aporta presencia (y color), **la identidad de cada pieza se infiere por seguimiento de estado**: partiendo de la posición inicial conocida, cada jugada legal actualiza el mapa casilla→pieza.
+4. **`move_detector`** — máquina de estados que interpreta los cambios del bitmap durante el turno humano:
    - Jugada simple: casilla origen se vacía → casilla destino se ocupa.
    - Captura: pieza rival levantada + pieza propia colocada en esa casilla (secuencia con estados intermedios).
    - Enroque: 4 eventos (rey y torre).
    - En passant: destino ocupado + peón capturado retirado de casilla distinta.
    - Valida contra jugadas legales de `python-chess`; si el cambio no corresponde a ninguna jugada legal → estado de error y aviso en UI.
    - Fin de jugada: botón de confirmación (o estabilidad ≥ N segundos).
-4. **`engine`** — wrapper UCI de Stockfish. Dificultad ajustable por `UCI_LimitStrength` + `UCI_Elo` (rango ~1320–3000) o `Skill Level` 0–20, más límite de tiempo por jugada. Expone también la **evaluación continua** de la posición para la UI.
-5. **`robot_controller`** — traducción de jugada UCI (ej. `e2e4`) a secuencia de movimientos:
+5. **`engine`** — wrapper UCI de Stockfish. Dificultad ajustable por `UCI_LimitStrength` + `UCI_Elo` (rango ~1320–3000) o `Skill Level` 0–20, más límite de tiempo por jugada. Expone también la **evaluación continua** de la posición para la UI.
+6. **`robot_controller`** — traducción de jugada UCI (ej. `e2e4`) a secuencia de movimientos:
    - Trayectoria: aproximación sobre la casilla a altura segura → descenso → cierre garra → ascenso a **altura de tránsito** (por encima de la pieza más alta, el rey) → traslado → descenso → apertura → retirada.
    - Capturas: primero retirar pieza capturada a la bandeja (siguiente posición libre de la grilla), luego mover la pieza propia.
    - Enroque: dos secuencias pick&place.
    - Promoción: depositar peón en bandeja de capturas, tomar dama de la bandeja de reserva.
    - `moveL` con blending para suavidad; velocidad y aceleración reducidas (entorno público).
-6. **`calibration`** — rutina asistida:
+7. **`calibration`** — rutina asistida:
    - Teach de 4 esquinas del tablero (freedrive o jog desde UI) → transformación para calcular las 64 posiciones.
    - Teach de bandeja de capturas y bandeja de reserva.
    - Tabla de alturas y aperturas de garra por tipo de pieza (peón, torre, caballo, alfil, dama, rey).
+   - Calibración de la cámara: marcado de las 4 esquinas en imagen y entrenamiento del clasificador (ver módulo `vision`).
    - Persistencia en JSON/YAML.
-7. **`api`** — REST + WebSocket para la UI: estado de partida, evaluación, historial de jugadas, control de dificultad, nueva partida, modo calibración, estado del robot y de sensores.
+8. **`api`** — REST + WebSocket para la UI: estado de partida, evaluación, historial de jugadas, control de dificultad, nueva partida, modo calibración, estado del robot y de sensores.
 
 ### 3.3 Frontend (UI de exposición)
 - Tablero virtual sincronizado en tiempo real.
@@ -120,8 +129,9 @@ Sistema demostrativo para exposición en el que un robot colaborativo **Universa
 ## 5. Manejo de errores y recuperación
 
 - **Jugada humana ilegal:** UI indica el error y pide restaurar; el sistema muestra qué casillas no coinciden.
-- **Desincronización tablero/estado:** modo *resync* — la UI muestra la posición esperada y el mapa real de sensores; el operador corrige piezas hasta que coincidan.
-- **Fallo de agarre** (pieza no tomada — verificable por sensor del tablero tras el pick): reintento automático (máx. 2) y luego aviso al operador.
+- **Desincronización tablero/estado:** modo *resync* — la UI muestra la posición esperada y el mapa real detectado por la cámara; el operador corrige piezas hasta que coincidan.
+- **Fallo de agarre** (pieza no tomada — verificable por la cámara tras el pick): reintento automático (máx. 2) y luego aviso al operador.
+- **Cambio de iluminación** (la clasificación pierde confianza): aviso en el panel de operador y re-entrenamiento rápido (~1 min, tablero vacío + posición inicial).
 - **Pérdida de conexión con el UR:** reconexión automática RTDE con backoff; partida pausada.
 - Logging completo (jugadas, eventos de sensores, comandos al robot) para diagnóstico.
 
@@ -131,10 +141,12 @@ Sistema demostrativo para exposición en el que un robot colaborativo **Universa
 - Proyecto Python: `game_state` + `engine` + simulador de tablero por consola/API.
 - Tests: detección de jugadas a partir de diffs de bitmap (incluyendo capturas, enroque, en passant, promoción).
 
-### Fase 2 — Tablero sensorizado
-- Driver de matriz (barrido gpiod), debounce, publicación por WebSocket.
-- Herramienta de diagnóstico visual de sensores.
-- Integrar `move_detector` con hardware real.
+### Fase 2 — Detección del tablero (visión artificial)
+- Módulo `vision`: cámara, homografía de 4 esquinas, clasificador de casillas (vacía/blanca/negra), `VisionDriver` con la interfaz `SensorDriver`, debounce y publicación por WebSocket.
+- Herramientas de operador: calibración por clicks y entrenamiento auto-etiquetado (tablero vacío + posición inicial), con vista previa en vivo.
+- Herramienta de diagnóstico visual de ocupación (ya existente, común a todos los drivers).
+- Integrar `move_detector` con la cámara real.
+- (Histórico: esta fase se implementó primero con matriz de reed vía PLC/GPIO; esos drivers quedan como respaldo.)
 
 ### Fase 3 — Robot y garra
 - Conexión `ur_rtde`, jog seguro, rutina de calibración de esquinas y bandejas.
@@ -152,7 +164,9 @@ Sistema demostrativo para exposición en el que un robot colaborativo **Universa
 ## 7. Decisiones pendientes
 
 - [ ] Modelo definitivo de garra Robotiq (recomendado Hand-E o 2F-85) y método de control (URCap vs Modbus).
-- [x] Electrónica de lectura de matriz: **barrido con diodos manejado por un PLC S7-1200 (CPU 1215C)**; la Pi lee la ocupación por Ethernet (snap7). El barrido directo por GPIO de la Pi queda implementado como respaldo.
+- [x] Detección de piezas: **visión artificial con cámara cenital + OpenCV** (clasificación vacía/blanca/negra por casilla, entrenamiento auto-etiquetado). Reemplaza a la matriz de reed vía PLC/GPIO, que queda como respaldo legado.
+- [x] Cámara: **Basler** (ya disponible, conectada con pylon; adquisición por pypylon). Pendiente solo el soporte/altura de montaje cenital definitivo.
+- [ ] Adaptar `PanelLink` (botón + baliza vía S7) para convivir con el driver de visión.
 - [ ] Botón físico de confirmación de jugada vs timeout de estabilidad (recomendado botón).
 - [ ] Dimensiones del tablero y de las piezas (define aperturas de garra y alturas).
 - [ ] Reloj de partida / límite de tiempo para el humano (opcional para la expo).
@@ -163,7 +177,8 @@ Sistema demostrativo para exposición en el que un robot colaborativo **Universa
 chess-robot/
 ├── backend/
 │   ├── app/
-│   │   ├── board_sensor/
+│   │   ├── vision/          # cámara, homografía, clasificador, VisionDriver
+│   │   ├── board_sensor/    # bitmap, debounce, scanner + drivers legados
 │   │   ├── game_state/
 │   │   ├── move_detector/
 │   │   ├── engine/

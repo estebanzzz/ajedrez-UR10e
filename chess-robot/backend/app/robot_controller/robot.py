@@ -145,9 +145,34 @@ class URRtdeRobot:
     # ------------------------------------------------------------- conexión
 
     def _ensure_control(self) -> None:
+        """Deja la interfaz de control lista para mover.
+
+        Dos fallas distintas, dos remedios:
+        - Socket caído (robot apagado/reiniciado): ``reconnect``.
+        - Socket vivo pero el **programa de control RTDE no corre** en el UR:
+          pasa tras una parada de protección o de emergencia (el UR aborta el
+          programa; al destrabar la parada no lo relanza). ``isConnected``
+          sigue en True, así que sin esto cada ``moveL`` fallaba con
+          "RTDE control script is not running" hasta reiniciar el backend.
+          ``reuploadScript`` vuelve a subirlo y arrancarlo.
+        """
         if not self._control.isConnected():
             log.warning("RTDE control desconectado; reconectando a %s", self._host)
             self._control.reconnect()
+            return
+        if self._control.isProgramRunning():
+            return
+        log.warning(
+            "El programa de control RTDE no corre en el UR %s "
+            "(¿parada de protección/emergencia?); re-subiendo el script",
+            self._host,
+        )
+        if not self._control.reuploadScript() or not self._control.isProgramRunning():
+            raise RuntimeError(
+                "El UR no acepta el programa de control: destrabar la parada de "
+                "protección/emergencia en la tablet, dejar el robot en Control "
+                "Remoto y reintentar."
+            )
 
     def _ensure_receive(self) -> None:
         if not self._receive.isConnected():
@@ -214,6 +239,8 @@ class URRtdeRobot:
                 joints_rad=list(self._receive.getActualQ()),
                 robot_mode=self._receive.getRobotMode(),  # 7 = RUNNING
                 safety_mode=self._receive.getSafetyMode(),  # 1 = NORMAL
+                # False tras una parada: el próximo movimiento lo re-sube solo.
+                program_running=self._control.isProgramRunning(),
             )
         except RuntimeError as exc:
             result.update(connected=False, error=str(exc))
@@ -247,3 +274,98 @@ class URRtdeRobot:
             self._control.disconnect()
             self._receive.disconnect()
             self._gripper.close()
+
+
+class LazyURRobot:
+    """Proxy de ``URRtdeRobot`` con conexión perezosa y reintentos.
+
+    El UR tarda en bootear y recién al final queda en Control Remoto; si el
+    backend arranca antes (o el robot se apaga y prende), la conexión inicial
+    falla. Este proxy reintenta en segundo plano con backoff hasta lograrla
+    y recién entonces delega todo en ``URRtdeRobot`` (que ya se
+    auto-reconecta ante cortes posteriores). Mientras tanto, los movimientos
+    fallan con un error claro y ``status()`` informa el motivo — el backend
+    nunca queda "en simulado" por arrancar antes que el robot.
+    """
+
+    RETRY_INTERVAL_S = 5.0
+
+    def __init__(self, host: str) -> None:
+        self._host = host
+        self._robot: URRtdeRobot | None = None
+        self._error: str | None = "conectando…"
+        self._lock = threading.Lock()
+        self._stop_retry = threading.Event()
+        self._thread = threading.Thread(
+            target=self._connect_loop, name="ur-connect", daemon=True
+        )
+        self._thread.start()
+
+    def _connect_loop(self) -> None:
+        while not self._stop_retry.is_set():
+            try:
+                robot = URRtdeRobot(self._host)
+            except Exception as exc:
+                self._error = str(exc)
+                log.warning(
+                    "UR en %s no disponible (%s); reintento en %.0f s",
+                    self._host,
+                    exc,
+                    self.RETRY_INTERVAL_S,
+                )
+                self._stop_retry.wait(self.RETRY_INTERVAL_S)
+            else:
+                with self._lock:
+                    self._robot = robot
+                self._error = None
+                log.info("Conectado al UR en %s", self._host)
+                return
+
+    def _require(self) -> URRtdeRobot:
+        with self._lock:
+            robot = self._robot
+        if robot is None:
+            raise RuntimeError(
+                f"Robot UR aún no conectado ({self._host}): {self._error}"
+            )
+        return robot
+
+    # -------------------------------------------------- delegación al robot
+
+    def move_linear(self, pose: Pose, speed: float, acceleration: float) -> None:
+        self._require().move_linear(pose, speed, acceleration)
+
+    def get_tcp_pose(self) -> Pose:
+        return self._require().get_tcp_pose()
+
+    def set_freedrive(self, enabled: bool) -> None:
+        self._require().set_freedrive(enabled)
+
+    def gripper_move(self, opening_mm: float, force: float) -> None:
+        self._require().gripper_move(opening_mm, force)
+
+    def status(self) -> dict:
+        with self._lock:
+            robot = self._robot
+        if robot is not None:
+            return robot.status()
+        return {
+            "simulated": False,
+            "host": self._host,
+            "connected": False,
+            "error": f"Robot UR aún no conectado: {self._error}",
+            "gripper": {"connected": False, "active": False},
+        }
+
+    def stop(self) -> None:
+        with self._lock:
+            robot = self._robot
+        if robot is not None:
+            robot.stop()
+
+    def close(self) -> None:
+        self._stop_retry.set()
+        with self._lock:
+            robot, self._robot = self._robot, None
+        if robot is not None:
+            robot.close()

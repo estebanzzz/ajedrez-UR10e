@@ -14,3 +14,6 @@ chess-robot/backend/config/local_*
 
 # Datos de la instalación (puntajes de la feria)
 chess-robot/backend/data/
+
+# Ajustes locales de Claude Code (permisos de esta maquina)
+.claude/settings.local.json

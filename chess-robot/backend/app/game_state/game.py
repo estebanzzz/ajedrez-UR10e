@@ -29,6 +29,10 @@ class GameState:
     def __init__(self, human_color: chess.Color = chess.WHITE) -> None:
         self.board = chess.Board()
         self.human_color = human_color
+        # Reclamar tablas automáticamente (triple repetición / 50 jugadas).
+        # Contra un humano no se usa; en la demo robot vs robot evita que la
+        # partida se eternice en un final repetitivo.
+        self.claim_draw = False
         self._san_history: list[str] = []
 
     # ------------------------------------------------------------------ estado
@@ -61,7 +65,7 @@ class GameState:
         return list(self.board.legal_moves)
 
     def outcome(self) -> GameOutcome | None:
-        outcome = self.board.outcome()
+        outcome = self.board.outcome(claim_draw=self.claim_draw)
         if outcome is None:
             return None
         return GameOutcome(

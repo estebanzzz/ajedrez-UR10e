@@ -13,6 +13,11 @@ Casos cubiertos:
 - En passant: destino se ocupa y el peón capturado sale de otra casilla.
 - Promoción: el bitmap no distingue la pieza elegida; se reportan candidatas
   y se usa dama por defecto (la pieza física sale de la bandeja de reserva).
+- Capturas indistinguibles: dos capturas desde el mismo origen dejan el mismo
+  bitmap final; si los sensores no vieron el estado intermedio que las
+  separa (la mano ocluye la casilla durante el cambio de piezas), se
+  devuelve ``DetectionAmbiguity`` con las candidatas para que el humano
+  elija en la UI — no es una jugada ilegal.
 """
 
 from __future__ import annotations
@@ -56,6 +61,16 @@ class DetectionError:
     @property
     def mismatched_squares(self) -> tuple[chess.Square, ...]:
         return tuple(sorted(self.diff.vacated + self.diff.occupied))
+
+
+@dataclass(frozen=True)
+class DetectionAmbiguity:
+    """El bitmap coincide con más de una jugada legal (capturas desde el
+    mismo origen sin estado intermedio observado): que el humano elija."""
+
+    candidates: tuple[chess.Move, ...]
+    diff: BitmapDiff
+    message: str = "No pude ver qué pieza capturaste: elegí tu jugada en la pantalla."
 
 
 def _touched_squares(board: chess.Board, move: chess.Move) -> set[chess.Square]:
@@ -134,7 +149,7 @@ class MoveDetector:
         self._observed_touched.update(diff.vacated, diff.occupied)
         return self.phase
 
-    def confirm(self) -> DetectionResult | DetectionError:
+    def confirm(self) -> DetectionResult | DetectionError | DetectionAmbiguity:
         """El humano confirmó su jugada (botón): resolver el bitmap final."""
         matches = [
             move
@@ -150,13 +165,10 @@ class MoveDetector:
             ]
             if len(by_final) == 1:
                 matches = by_final
+            elif not by_final:
+                return DetectionError(diff=self.diff)
             else:
-                message = (
-                    "El tablero no coincide con ninguna jugada legal."
-                    if not by_final
-                    else "Jugada ambigua: no se pudo determinar la captura realizada."
-                )
-                return DetectionError(diff=self.diff, message=message)
+                matches = by_final
 
         promotions = [move for move in matches if move.promotion]
         if promotions:
@@ -167,10 +179,8 @@ class MoveDetector:
             return DetectionResult(move=default, promotion_candidates=tuple(promotions))
 
         if len(matches) > 1:
-            # Solo posible si los sensores no registraron el estado intermedio
-            # que distingue dos capturas desde el mismo origen.
-            return DetectionError(
-                diff=self.diff,
-                message="Jugada ambigua: no se pudo determinar la captura realizada.",
-            )
+            # Los sensores no registraron el estado intermedio que distingue
+            # dos capturas desde el mismo origen: la jugada está bien hecha,
+            # solo falta que el humano diga cuál fue.
+            return DetectionAmbiguity(candidates=tuple(matches), diff=self.diff)
         return DetectionResult(move=matches[0])

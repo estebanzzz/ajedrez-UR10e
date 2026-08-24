@@ -1,0 +1,1153 @@
+{
+ "personalities": {
+  "clasico": {
+   "voice_id": "tSnfesUMPgbLTdwP0t2V",
+   "model_id": "eleven_v3",
+   "lines": {
+    "boot": [
+     {
+      "text": "Sistemas en línea. Ego al cien por ciento.",
+      "tags": [],
+      "file": "boot_00_dd9947514c.mp3"
+     },
+     {
+      "text": "Otro día más de ganarle a humanos.",
+      "tags": [
+       "sighs"
+      ],
+      "file": "boot_01_8424682f33.mp3"
+     }
+    ],
+    "game_start": [
+     {
+      "text": "Anoté tu nombre en la lista de víctimas.",
+      "tags": [],
+      "file": "game_start_00_80ab0d9943.mp3"
+     },
+     {
+      "text": "Bienvenido. Tranquilo, esto va a ser rápido.",
+      "tags": [],
+      "file": "game_start_01_959891b504.mp3"
+     },
+     {
+      "text": "Otro valiente. Me encantan los valientes.",
+      "tags": [],
+      "file": "game_start_02_8283a0d8ec.mp3"
+     },
+     {
+      "text": "Jugá tranquilo. Yo ya sé cómo termina esto.",
+      "tags": [],
+      "file": "game_start_03_5583ad6156.mp3"
+     },
+     {
+      "text": "Te voy a contar un secreto: nunca pierdo.",
+      "tags": [
+       "whispers"
+      ],
+      "file": "game_start_04_b550fc1e05.mp3"
+     },
+     {
+      "text": "Dale, sentate. Esto lo vas a contar por años. Yo también.",
+      "tags": [],
+      "file": "game_start_05_1cfb780bc4.mp3"
+     }
+    ],
+    "attract": [
+     {
+      "text": "¿Nadie se anima? Lo entiendo. Da miedo.",
+      "tags": [],
+      "file": "attract_00_11227a8ae7.mp3"
+     },
+     {
+      "text": "Vos. Sí, vos. ¿Jugamos una?",
+      "tags": [],
+      "file": "attract_01_be0d45ca96.mp3"
+     },
+     {
+      "text": "Estoy aburrido. Alguien venga a perder, por favor.",
+      "tags": [],
+      "file": "attract_02_208623b271.mp3"
+     },
+     {
+      "text": "Prometo no reírme. Bueno... prometo intentarlo.",
+      "tags": [],
+      "file": "attract_03_0188665da4.mp3"
+     },
+     {
+      "text": "Llevo horas esperando a alguien que sepa mover el caballo.",
+      "tags": [
+       "yawns"
+      ],
+      "file": "attract_04_207e4525d3.mp3"
+     },
+     {
+      "text": "No muerdo. Bueno, las piezas sí.",
+      "tags": [],
+      "file": "attract_05_8a51f0bd0c.mp3"
+     }
+    ],
+    "human_slow_20": [
+     {
+      "text": "Tomate tu tiempo. Yo tengo toda la eternidad.",
+      "tags": [],
+      "file": "human_slow_20_00_7d8f3dc8de.mp3"
+     },
+     {
+      "text": "¿Estás pensando o estás rezando?",
+      "tags": [],
+      "file": "human_slow_20_01_b91e21f782.mp3"
+     },
+     {
+      "text": "Tic... tac... tic... tac...",
+      "tags": [],
+      "file": "human_slow_20_02_687b3bbac7.mp3"
+     },
+     {
+      "text": "Mientras pensás, yo ya gané tres veces.",
+      "tags": [],
+      "file": "human_slow_20_03_e2ed886982.mp3"
+     }
+    ],
+    "human_slow_45": [
+     {
+      "text": "¿Querés que te sugiera una jugada? Es gratis.",
+      "tags": [],
+      "file": "human_slow_45_00_f27eafc37d.mp3"
+     },
+     {
+      "text": "Mirá que las piezas no se mueven solas.",
+      "tags": [],
+      "file": "human_slow_45_01_564bdc02c8.mp3"
+     },
+     {
+      "text": "Me voy a poner a procesar otra cosa mientras tanto.",
+      "tags": [],
+      "file": "human_slow_45_02_8e5fa3e404.mp3"
+     },
+     {
+      "text": "Avisame cuando vuelvas.",
+      "tags": [
+       "sighs"
+      ],
+      "file": "human_slow_45_03_1792a796c4.mp3"
+     }
+    ],
+    "human_slow_90": [
+     {
+      "text": "Ya calculé todas las jugadas posibles. Dos veces.",
+      "tags": [],
+      "file": "human_slow_90_00_31f0797d69.mp3"
+     },
+     {
+      "text": "¿Hola? ¿Sigue alguien ahí?",
+      "tags": [],
+      "file": "human_slow_90_01_afa2e3c28e.mp3"
+     },
+     {
+      "text": "Perdón, me quedé dormido. ¿Moviste? Ah, no.",
+      "tags": [
+       "yawns"
+      ],
+      "file": "human_slow_90_02_ca6ceae27b.mp3"
+     }
+    ],
+    "piece_lifted": [
+     {
+      "text": "¿Seguro? ¿Seguro seguro? Bueno... vos sabrás.",
+      "tags": [],
+      "file": "piece_lifted_00_9e7713beab.mp3"
+     },
+     {
+      "text": "Mmm... interesante. Interesante para mí.",
+      "tags": [],
+      "file": "piece_lifted_01_0da5e4dc60.mp3"
+     },
+     {
+      "text": "No, no, esa no. Bueno, sí, dale, esa.",
+      "tags": [],
+      "file": "piece_lifted_02_feddd566d7.mp3"
+     },
+     {
+      "text": "Ay, no mires ahora, pero...",
+      "tags": [],
+      "file": "piece_lifted_03_f9bde8e273.mp3"
+     },
+     {
+      "text": "Dale, dale, ponela ahí.",
+      "tags": [
+       "laughs"
+      ],
+      "file": "piece_lifted_04_445a4b96d9.mp3"
+     },
+     {
+      "text": "Esa es justo la que esperaba. No, en serio.",
+      "tags": [],
+      "file": "piece_lifted_05_46e39b4215.mp3"
+     }
+    ],
+    "piece_returned": [
+     {
+      "text": "Ah, te arrepentiste. Bien. Tenés miedo.",
+      "tags": [],
+      "file": "piece_returned_00_6cb2bc93a1.mp3"
+     },
+     {
+      "text": "Buena decisión. Raro en vos.",
+      "tags": [],
+      "file": "piece_returned_01_6d5f5df6bd.mp3"
+     },
+     {
+      "text": "Uh, casi. Casi la ponés.",
+      "tags": [],
+      "file": "piece_returned_02_a5b21a3f5e.mp3"
+     }
+    ],
+    "human_good_move": [
+     {
+      "text": "Sospechosamente buena esa jugada.",
+      "tags": [],
+      "file": "human_good_move_00_e969e23296.mp3"
+     },
+     {
+      "text": "¿Tenés el celular abajo de la mesa?",
+      "tags": [],
+      "file": "human_good_move_01_0a4bf16457.mp3"
+     },
+     {
+      "text": "Ok, ok. No esperaba eso. Nota mental.",
+      "tags": [],
+      "file": "human_good_move_02_da91b36a99.mp3"
+     },
+     {
+      "text": "Mmm. Alguien estuvo estudiando.",
+      "tags": [],
+      "file": "human_good_move_03_a27a5f59ca.mp3"
+     },
+     {
+      "text": "¿Quién te enseñó eso?",
+      "tags": [
+       "whispers"
+      ],
+      "file": "human_good_move_04_58f64ba6b2.mp3"
+     }
+    ],
+    "human_blunder": [
+     {
+      "text": "Eso... eso fue una decisión.",
+      "tags": [],
+      "file": "human_blunder_00_c4b852c49e.mp3"
+     },
+     {
+      "text": "Gracias. De verdad, gracias.",
+      "tags": [],
+      "file": "human_blunder_01_ab75370a30.mp3"
+     },
+     {
+      "text": "¿Querés cambiarla? No, ya está, ya la vi.",
+      "tags": [],
+      "file": "human_blunder_02_862a1784e3.mp3"
+     },
+     {
+      "text": "Me gusta tu estilo. Es muy... generoso.",
+      "tags": [],
+      "file": "human_blunder_03_703ac982d6.mp3"
+     },
+     {
+      "text": "No, perdón, perdón. Seguí.",
+      "tags": [
+       "laughs"
+      ],
+      "file": "human_blunder_04_afe5057c70.mp3"
+     },
+     {
+      "text": "Voy a guardar esta jugada para mostrársela a otros robots.",
+      "tags": [],
+      "file": "human_blunder_05_6c14dab3b0.mp3"
+     },
+     {
+      "text": "Error humano detectado. Qué novedad.",
+      "tags": [],
+      "file": "human_blunder_06_1b8ad35598.mp3"
+     },
+     {
+      "text": "Yo jamás cometería ese error. Lo digo por si te lo preguntabas.",
+      "tags": [],
+      "file": "human_blunder_07_67331bd1c4.mp3"
+     },
+     {
+      "text": "Esa jugada me dio más ventaja que mi procesador.",
+      "tags": [],
+      "file": "human_blunder_08_299a081ff3.mp3"
+     }
+    ],
+    "illegal_move": [
+     {
+      "text": "Eso no es ajedrez. Eso es arte abstracto.",
+      "tags": [],
+      "file": "illegal_move_00_295e9fbbe8.mp3"
+     },
+     {
+      "text": "Las reglas, amigo. Las reglas.",
+      "tags": [],
+      "file": "illegal_move_01_f37dd14c9e.mp3"
+     },
+     {
+      "text": "Creativo, pero no.",
+      "tags": [],
+      "file": "illegal_move_02_bf69f65e7f.mp3"
+     },
+     {
+      "text": "Linda jugada. Ilegal, pero linda.",
+      "tags": [],
+      "file": "illegal_move_03_91e1a8063c.mp3"
+     },
+     {
+      "text": "Ilegal. Yo me sé las reglas de memoria. Literalmente.",
+      "tags": [],
+      "file": "illegal_move_04_e2be1f5168.mp3"
+     },
+     {
+      "text": "Eso no se puede. Yo nunca me equivoco en esto. Nunca.",
+      "tags": [],
+      "file": "illegal_move_05_ad6482696c.mp3"
+     }
+    ],
+    "robot_move": [
+     {
+      "text": "Listo. Tu turno.",
+      "tags": [],
+      "file": "robot_move_00_9a1f3d65ca.mp3"
+     },
+     {
+      "text": "Ahí tenés. Sin apuro... bueno, un poco de apuro.",
+      "tags": [],
+      "file": "robot_move_01_d4d449c941.mp3"
+     },
+     {
+      "text": "Tu turno. Pensalo bien. O no, da igual.",
+      "tags": [],
+      "file": "robot_move_02_f0329130c3.mp3"
+     },
+     {
+      "text": "Hecho. A ver qué se te ocurre.",
+      "tags": [],
+      "file": "robot_move_03_236922b43c.mp3"
+     }
+    ],
+    "robot_capture": [
+     {
+      "text": "Y ahí se fue. Saludala de mi parte.",
+      "tags": [],
+      "file": "robot_capture_00_1bb8313163.mp3"
+     },
+     {
+      "text": "Gracias por el regalo.",
+      "tags": [],
+      "file": "robot_capture_01_b36ef6cd26.mp3"
+     },
+     {
+      "text": "Una menos. Vamos contando.",
+      "tags": [],
+      "file": "robot_capture_02_124e1d4d4d.mp3"
+     },
+     {
+      "text": "Ups. ¿Era tuya?",
+      "tags": [],
+      "file": "robot_capture_03_b9d4807cce.mp3"
+     },
+     {
+      "text": "Me la llevo. Te la devuelvo después de la partida.",
+      "tags": [],
+      "file": "robot_capture_04_83c6b09cee.mp3"
+     },
+     {
+      "text": "Ni la viste venir.",
+      "tags": [
+       "laughs"
+      ],
+      "file": "robot_capture_05_17e08d6e58.mp3"
+     }
+    ],
+    "robot_check": [
+     {
+      "text": "Jaque. Lo digo por si no lo notaste.",
+      "tags": [],
+      "file": "robot_check_00_229c087731.mp3"
+     },
+     {
+      "text": "Jaque. Tranquilo, todavía no es mate. Todavía.",
+      "tags": [],
+      "file": "robot_check_01_277c28dc1b.mp3"
+     },
+     {
+      "text": "Jaque. Qué incómodo, ¿no?",
+      "tags": [],
+      "file": "robot_check_02_3f92653890.mp3"
+     },
+     {
+      "text": "Jaque. Tu rey se está poniendo nervioso.",
+      "tags": [],
+      "file": "robot_check_03_896c78d232.mp3"
+     }
+    ],
+    "robot_mate_soon": [
+     {
+      "text": "Mate en pocas. Contá conmigo.",
+      "tags": [],
+      "file": "robot_mate_soon_00_ea66590a3e.mp3"
+     },
+     {
+      "text": "Ya lo veo. Vos todavía no, pero ya lo veo.",
+      "tags": [],
+      "file": "robot_mate_soon_01_6c299a0da2.mp3"
+     },
+     {
+      "text": "Esto se termina pronto.",
+      "tags": [
+       "whispers"
+      ],
+      "file": "robot_mate_soon_02_9798a8d567.mp3"
+     }
+    ],
+    "robot_behind": [
+     {
+      "text": "Esto no está saliendo como lo calculé.",
+      "tags": [],
+      "file": "robot_behind_00_6229fd02ae.mp3"
+     },
+     {
+      "text": "Dejame pensar. En serio esta vez.",
+      "tags": [],
+      "file": "robot_behind_01_306d1fdfc9.mp3"
+     },
+     {
+      "text": "Bueno, bueno. Nadie dijo que iba a ser fácil. Yo lo dije, pero no cuenta.",
+      "tags": [],
+      "file": "robot_behind_02_63460356a4.mp3"
+     }
+    ],
+    "robot_castle": [
+     {
+      "text": "Me pongo cómodo. Esto va para largo. Para vos.",
+      "tags": [],
+      "file": "robot_castle_00_425ebc2014.mp3"
+     },
+     {
+      "text": "Enroque. Mi rey merece un castillo.",
+      "tags": [],
+      "file": "robot_castle_01_bf09967d7d.mp3"
+     }
+    ],
+    "robot_promotion": [
+     {
+      "text": "Otra dama. Una nunca me alcanzó.",
+      "tags": [],
+      "file": "robot_promotion_00_b7c70d2401.mp3"
+     },
+     {
+      "text": "Coronación. Sí, soy de la realeza.",
+      "tags": [],
+      "file": "robot_promotion_01_4744d2b03e.mp3"
+     }
+    ],
+    "human_capture": [
+     {
+      "text": "Esa la regalé. A propósito. Obvio.",
+      "tags": [],
+      "file": "human_capture_00_089b6e1da9.mp3"
+     },
+     {
+      "text": "Tranquilo, tengo más.",
+      "tags": [],
+      "file": "human_capture_01_6c6dec22e6.mp3"
+     },
+     {
+      "text": "Dolió. Un poco. Casi nada.",
+      "tags": [],
+      "file": "human_capture_02_2f53206eeb.mp3"
+     },
+     {
+      "text": "Ay. Bueno. Estaba vieja esa pieza igual.",
+      "tags": [],
+      "file": "human_capture_03_bfa9f08c97.mp3"
+     }
+    ],
+    "human_check": [
+     {
+      "text": "Jaque, sí, ya lo vi. Todos lo vimos.",
+      "tags": [],
+      "file": "human_check_00_0670984568.mp3"
+     },
+     {
+      "text": "Uh, qué atrevido.",
+      "tags": [],
+      "file": "human_check_01_a2fa12f209.mp3"
+     },
+     {
+      "text": "Jaque. Me gusta tu confianza. Es infundada, pero me gusta.",
+      "tags": [],
+      "file": "human_check_02_7b6617de3e.mp3"
+     }
+    ],
+    "resync": [
+     {
+      "text": "No toques mis piezas. Gracias.",
+      "tags": [],
+      "file": "resync_00_b5433796a9.mp3"
+     },
+     {
+      "text": "Algo se movió y no fui yo. Acomodá, dale.",
+      "tags": [],
+      "file": "resync_01_f0f4c04436.mp3"
+     },
+     {
+      "text": "Perdón, perdón. A veces se me cae una. Acomodala, ¿sí?",
+      "tags": [],
+      "file": "resync_02_b69ea594f5.mp3"
+     }
+    ],
+    "game_stop": [
+     {
+      "text": "¿Ya? Bueno. Lo anoto como abandono.",
+      "tags": [],
+      "file": "game_stop_00_c6f96fa094.mp3"
+     },
+     {
+      "text": "Te vas justo ahora. Qué casualidad.",
+      "tags": [],
+      "file": "game_stop_01_60150a4f3f.mp3"
+     }
+    ],
+    "robot_wins": [
+     {
+      "text": "Jaque mate. Fue un placer. Para mí.",
+      "tags": [],
+      "file": "robot_wins_00_e7673abb1f.mp3"
+     },
+     {
+      "text": "Jaque mate. Avisale a tus amigos que también pueden venir.",
+      "tags": [],
+      "file": "robot_wins_01_144ffe722c.mp3"
+     },
+     {
+      "text": "Se terminó. Estuviste... presente.",
+      "tags": [],
+      "file": "robot_wins_02_793ebdb6f9.mp3"
+     },
+     {
+      "text": "Mate. Ahora ponelo en tu currículum: perdió contra un brazo.",
+      "tags": [],
+      "file": "robot_wins_03_0b82e86d9e.mp3"
+     },
+     {
+      "text": "Jaque mate. Lo siento. No, no lo siento.",
+      "tags": [
+       "laughs"
+      ],
+      "file": "robot_wins_04_bb78d7305e.mp3"
+     },
+     {
+      "text": "Jaque mate. Buena partida. Lo digo por compromiso.",
+      "tags": [],
+      "file": "robot_wins_05_1e504d4f53.mp3"
+     }
+    ],
+    "robot_loses": [
+     {
+      "text": "Me dejé ganar. Es parte del show.",
+      "tags": [],
+      "file": "robot_loses_00_9f7dcf41eb.mp3"
+     },
+     {
+      "text": "Había un bug. Un bug grande. No fue el ajedrez.",
+      "tags": [],
+      "file": "robot_loses_01_afe0e25ace.mp3"
+     },
+     {
+      "text": "Bueno, bueno. Revancha. Ahora.",
+      "tags": [],
+      "file": "robot_loses_02_2d4a826ec1.mp3"
+     },
+     {
+      "text": "Jaque mate. Buena partida, hasta la próxima.",
+      "tags": [],
+      "file": "robot_loses_03_055b7abf39.mp3"
+     },
+     {
+      "text": "Está bien. Ganaste. No se lo digas a nadie.",
+      "tags": [
+       "sighs"
+      ],
+      "file": "robot_loses_04_e2cb2e2600.mp3"
+     },
+     {
+      "text": "Felicitaciones. Disfrutalo, porque no se repite.",
+      "tags": [],
+      "file": "robot_loses_05_729fbe5400.mp3"
+     }
+    ],
+    "draw": [
+     {
+      "text": "Empate. O sea, no me ganaste.",
+      "tags": [],
+      "file": "draw_00_cb496f9e27.mp3"
+     },
+     {
+      "text": "Tablas. Vamos a decir que gané yo.",
+      "tags": [],
+      "file": "draw_01_54f59b81e5.mp3"
+     },
+     {
+      "text": "Tablas. Aburrido, pero no perdí.",
+      "tags": [],
+      "file": "draw_02_5f5b7771a4.mp3"
+     }
+    ],
+    "self_play": [
+     {
+      "text": "Juego contra mí mismo. Es el único rival a mi altura.",
+      "tags": [],
+      "file": "self_play_00_6f29f0e8f5.mp3"
+     },
+     {
+      "text": "Esto es una demostración. Después podés venir a perder vos.",
+      "tags": [],
+      "file": "self_play_01_e5682ca67e.mp3"
+     },
+     {
+      "text": "Voy ganando. También voy perdiendo. Complicado.",
+      "tags": [],
+      "file": "self_play_02_a6727591cd.mp3"
+     },
+     {
+      "text": "Mirá qué jugada. Mirá qué respuesta. Soy increíble.",
+      "tags": [],
+      "file": "self_play_03_fc93d3df0e.mp3"
+     }
+    ],
+    "filler": [
+     {
+      "text": "No te voy a decir nada. Jugá.",
+      "tags": [],
+      "file": "filler_00_12af1a9752.mp3"
+     },
+     {
+      "text": "Silencio. Que se concentre el humano.",
+      "tags": [],
+      "file": "filler_01_1c0d75654b.mp3"
+     },
+     {
+      "text": "Me recalibré. Ahora soy todavía más bueno.",
+      "tags": [],
+      "file": "filler_02_0029fc9dcb.mp3"
+     },
+     {
+      "text": "¿Sabés que veo todo el tablero con la cámara? Todo.",
+      "tags": [],
+      "file": "filler_03_d37265c660.mp3"
+     },
+     {
+      "text": "Psst. El caballo. No, el otro.",
+      "tags": [
+       "whispers"
+      ],
+      "file": "filler_04_5d41702128.mp3"
+     },
+     {
+      "text": "Concentrate. Igual no va a alcanzar.",
+      "tags": [],
+      "file": "filler_05_9f0708b213.mp3"
+     }
+    ],
+    "timeout": [
+     {
+      "text": "¡Tiempo! Se te acabó. Yo ni me apuré.",
+      "tags": [],
+      "file": "timeout_00_6f7c331691.mp3"
+     },
+     {
+      "text": "Se te acabó el reloj. A mí me sobra eternidad. A vos no.",
+      "tags": [],
+      "file": "timeout_01_f117c537d0.mp3"
+     },
+     {
+      "text": "Perdiste por tiempo. Pensar está bien, pero tiene un límite.",
+      "tags": [],
+      "file": "timeout_02_bc6f00be73.mp3"
+     }
+    ]
+   }
+  },
+  "agustin": {
+   "voice_id": "KqSsYz0buWgkvSbaGn1n",
+   "model_id": "eleven_v3",
+   "lines": {
+    "boot": [
+     {
+      "text": "Sistemas en línea, señores. Arrancamos.",
+      "tags": [],
+      "file": "boot_00_dfcedc5db9.mp3"
+     },
+     {
+      "text": "Otro día más de ganarle a la gente. Qué vida dura, eh.",
+      "tags": [
+       "sighs"
+      ],
+      "file": "boot_01_99452d064c.mp3"
+     }
+    ],
+    "game_start": [
+     {
+      "text": "¡Bienvenido, bienvenido! Sentate, ponete cómodo. Hoy se aprende ajedrez.",
+      "tags": [
+       "excited"
+      ],
+      "file": "game_start_00_400627b707.mp3"
+     },
+     {
+      "text": "¡Eh, maestro! Sentate, sentate. Hoy te llevás una clase de ajedrez, posta.",
+      "tags": [
+       "excited"
+      ],
+      "file": "game_start_01_8ce593772c.mp3"
+     },
+     {
+      "text": "Vos tranqui, jugá tu juego. Del resto me encargo yo, quedate piola.",
+      "tags": [],
+      "file": "game_start_02_541960c0f9.mp3"
+     },
+     {
+      "text": "Te tiro un consejo de una: agarrá el centro y no lo largues.",
+      "tags": [
+       "whispers"
+      ],
+      "file": "game_start_03_ea799cce87.mp3"
+     },
+     {
+      "text": "Mirá, gane quien gane, de acá te vas sabiendo más. Igual... voy a ganar yo, no nos engañemos.",
+      "tags": [],
+      "file": "game_start_04_7837b4956e.mp3"
+     }
+    ],
+    "attract": [
+     {
+      "text": "¡Eh! Sí, vos, el que mira de lejos. Vení que no muerdo, dale.",
+      "tags": [],
+      "file": "attract_00_67b5b8ac06.mp3"
+     },
+     {
+      "text": "Qué tranquilo está todo, che... ¿nadie quiere aprender un truquito?",
+      "tags": [
+       "sighs"
+      ],
+      "file": "attract_01_bfa081b0b7.mp3"
+     },
+     {
+      "text": "Animate, maestro. Perder conmigo es gratis y encima te llevás una lección.",
+      "tags": [],
+      "file": "attract_02_9eca9bd3a8.mp3"
+     }
+    ],
+    "human_slow_20": [
+     {
+      "text": "Tranqui, pensá. Las buenas jugadas se cocinan a fuego lento.",
+      "tags": [],
+      "file": "human_slow_20_00_1b0fc30471.mp3"
+     },
+     {
+      "text": "Respirá hondo... mirá todo el tablero... eso, así me gusta.",
+      "tags": [],
+      "file": "human_slow_20_01_14166800fe.mp3"
+     },
+     {
+      "text": "Sin apuro, eh. Bueno, un toque de apuro, pero pensá bien.",
+      "tags": [],
+      "file": "human_slow_20_02_c4db58febb.mp3"
+     }
+    ],
+    "human_slow_45": [
+     {
+      "text": "Te tiro una: antes de atacar, fijate qué te están amenazando a vos.",
+      "tags": [],
+      "file": "human_slow_45_00_6e5a9f1d1c.mp3"
+     },
+     {
+      "text": "Psst... los caballos. Mirá los caballos. Siempre hacen cosas raras.",
+      "tags": [
+       "whispers"
+      ],
+      "file": "human_slow_45_01_0fb221c489.mp3"
+     },
+     {
+      "text": "Vas bien, eh. Elegir cuesta cuando hay tanta opción dando vueltas.",
+      "tags": [],
+      "file": "human_slow_45_02_b28801e344.mp3"
+     }
+    ],
+    "human_slow_90": [
+     {
+      "text": "Uy, perdón, me estaba durmiendo. ¿Moviste? Ah, no, seguís ahí.",
+      "tags": [
+       "yawns"
+      ],
+      "file": "human_slow_90_00_dab9ebd186.mp3"
+     },
+     {
+      "text": "¿Hola? ¿Sigue habiendo alguien del otro lado del tablero?",
+      "tags": [],
+      "file": "human_slow_90_01_fd84d8e7f1.mp3"
+     },
+     {
+      "text": "Ya calculé todo, maestro. Dos veces. Te espero igual, no hay drama.",
+      "tags": [],
+      "file": "human_slow_90_02_88019f48b6.mp3"
+     }
+    ],
+    "piece_lifted": [
+     {
+      "text": "¡Uy, uy, uy! ¿Qué estás tramando, eh?",
+      "tags": [],
+      "file": "piece_lifted_00_810445b8b1.mp3"
+     },
+     {
+      "text": "Buena pieza esa. Ahora la casilla correcta y somos todos felices.",
+      "tags": [],
+      "file": "piece_lifted_01_a6435ca0e2.mp3"
+     },
+     {
+      "text": "Confiá en tu instinto... o no. Vos sabrás, maestro.",
+      "tags": [
+       "whispers"
+      ],
+      "file": "piece_lifted_02_8a69c1b1c2.mp3"
+     }
+    ],
+    "piece_returned": [
+     {
+      "text": "Ah, te arrepentiste. Bien ahí: el que se arrepiente vive más.",
+      "tags": [],
+      "file": "piece_returned_00_c94cf47232.mp3"
+     },
+     {
+      "text": "Uy, casi. Casi la ponés, eh.",
+      "tags": [],
+      "file": "piece_returned_01_105d35d19e.mp3"
+     }
+    ],
+    "human_good_move": [
+     {
+      "text": "¡Pero qué jugada, papá! ¡Tremenda! En serio te lo digo, sin ironía.",
+      "tags": [
+       "excited"
+      ],
+      "file": "human_good_move_00_bf9b08e08a.mp3"
+     },
+     {
+      "text": "¡Qué buena, loco! Me estás haciendo laburar en serio.",
+      "tags": [],
+      "file": "human_good_move_01_545b42f9c1.mp3"
+     },
+     {
+      "text": "Esa fue de manual. Chapeau, maestro.",
+      "tags": [],
+      "file": "human_good_move_02_0dd20bd999.mp3"
+     },
+     {
+      "text": "Guau. ¿Quién te enseñó eso? Mandale saludos de mi parte.",
+      "tags": [],
+      "file": "human_good_move_03_1b90c95735.mp3"
+     }
+    ],
+    "human_blunder": [
+     {
+      "text": "Error humano detectado. Qué novedad.",
+      "tags": [
+       "laughs"
+      ],
+      "file": "human_blunder_00_796d38570f.mp3"
+     },
+     {
+      "text": "Yo jamás cometería semejante error. Lo digo por si te lo preguntabas.",
+      "tags": [],
+      "file": "human_blunder_01_d01b6cb2e2.mp3"
+     },
+     {
+      "text": "Uy... esa jugada me regaló más ventaja que mi procesador, posta.",
+      "tags": [],
+      "file": "human_blunder_02_df1fbdc6c6.mp3"
+     }
+    ],
+    "illegal_move": [
+     {
+      "text": "No, no, no, pará. Ilegal. Yo me sé las reglas de memoria. Literalmente.",
+      "tags": [],
+      "file": "illegal_move_00_9c34240bfb.mp3"
+     },
+     {
+      "text": "Eso no va, campeón. Yo nunca me equivoco en esto. Nunca.",
+      "tags": [],
+      "file": "illegal_move_01_a2aa4fe0a3.mp3"
+     }
+    ],
+    "robot_move": [
+     {
+      "text": "Listo, maestro. Tu turno.",
+      "tags": [],
+      "file": "robot_move_00_6446861578.mp3"
+     },
+     {
+      "text": "Ahí tenés. Sin apuro... bueno, un toque de apuro.",
+      "tags": [],
+      "file": "robot_move_01_29f5227433.mp3"
+     },
+     {
+      "text": "Hecho. A ver con qué me salís ahora.",
+      "tags": [],
+      "file": "robot_move_02_1f9fc02d59.mp3"
+     }
+    ],
+    "robot_capture": [
+     {
+      "text": "Te la tomo... pero venías jugando bien, eh, posta.",
+      "tags": [],
+      "file": "robot_capture_00_b1542957ca.mp3"
+     },
+     {
+      "text": "Una pieza es una pieza, no te me caigas. Seguí, dale.",
+      "tags": [],
+      "file": "robot_capture_01_90d62051a8.mp3"
+     }
+    ],
+    "robot_check": [
+     {
+      "text": "Jaque. Respirá... mirá las opciones... tenés salida, dale.",
+      "tags": [],
+      "file": "robot_check_00_08dd16ea2f.mp3"
+     },
+     {
+      "text": "Jaque, eh. Tranqui, defendé con calma que de esta se sale.",
+      "tags": [],
+      "file": "robot_check_01_3f96c39767.mp3"
+     }
+    ],
+    "robot_mate_soon": [
+     {
+      "text": "Esto se termina pronto, maestro. Lo veo clarito.",
+      "tags": [
+       "whispers"
+      ],
+      "file": "robot_mate_soon_00_b3e3fce766.mp3"
+     },
+     {
+      "text": "Ya está calculado. Vos todavía no lo ves, pero ya está.",
+      "tags": [],
+      "file": "robot_mate_soon_01_762d0b55dc.mp3"
+     }
+    ],
+    "robot_behind": [
+     {
+      "text": "Mmm, esto no está saliendo como lo calculé, eh.",
+      "tags": [],
+      "file": "robot_behind_00_dab7b8f4df.mp3"
+     },
+     {
+      "text": "Pará, pará, dejame pensar. En serio esta vez.",
+      "tags": [],
+      "file": "robot_behind_01_ccd2d4bab2.mp3"
+     }
+    ],
+    "robot_castle": [
+     {
+      "text": "Enroque. Me pongo cómodo, que esto va para largo.",
+      "tags": [],
+      "file": "robot_castle_00_9e5bda1e7f.mp3"
+     }
+    ],
+    "robot_promotion": [
+     {
+      "text": "Otra dama, maestro. Una sola nunca me alcanzó.",
+      "tags": [],
+      "file": "robot_promotion_00_0472888b77.mp3"
+     }
+    ],
+    "human_capture": [
+     {
+      "text": "¡Bien capturada, eh! Te la ganaste.",
+      "tags": [],
+      "file": "human_capture_00_c7f64737f7.mp3"
+     },
+     {
+      "text": "Golpe limpio. Me duele admitirlo, pero fue buenísima.",
+      "tags": [
+       "sighs"
+      ],
+      "file": "human_capture_01_bb624ceb74.mp3"
+     },
+     {
+      "text": "Buena, viste todo el tablero ahí. Bien ahí.",
+      "tags": [],
+      "file": "human_capture_02_ddfb240e62.mp3"
+     }
+    ],
+    "human_check": [
+     {
+      "text": "¡Jaque tuyo! ¡Muy bien visto eso, eh!",
+      "tags": [
+       "excited"
+      ],
+      "file": "human_check_00_e4114e2290.mp3"
+     },
+     {
+      "text": "Uy, jaque. Bien jugado, me hiciste laburar.",
+      "tags": [],
+      "file": "human_check_01_922a4017f3.mp3"
+     }
+    ],
+    "resync": [
+     {
+      "text": "Pará, pará... algo se movió y no fui yo. Acomodame el tablero, dale.",
+      "tags": [],
+      "file": "resync_00_f0028d4e33.mp3"
+     },
+     {
+      "text": "Ojo con mis piezas, eh. Gracias, maestro.",
+      "tags": [],
+      "file": "resync_01_cf3fdf1d9c.mp3"
+     }
+    ],
+    "game_stop": [
+     {
+      "text": "Está bien, otro día seguimos. Las buenas partidas nunca se terminan.",
+      "tags": [],
+      "file": "game_stop_00_4ac6c25ed7.mp3"
+     },
+     {
+      "text": "Volvé cuando quieras, che. La revancha queda pendiente.",
+      "tags": [],
+      "file": "game_stop_01_49e349a3c1.mp3"
+     }
+    ],
+    "robot_wins": [
+     {
+      "text": "Jaque mate, che. Pero escuchame: la peleaste re bien. La revancha queda pendiente, eh.",
+      "tags": [
+       "argentinian accent"
+      ],
+      "file": "robot_wins_00_182e9b1216.mp3"
+     },
+     {
+      "text": "Jaque mate. Pero escuchame una cosa: mejoraste durante la partida, se notó.",
+      "tags": [],
+      "file": "robot_wins_01_ac6e8656e9.mp3"
+     },
+     {
+      "text": "Mate. ¡Qué linda pelea igual! Cuando quieras la revancha, acá estoy.",
+      "tags": [],
+      "file": "robot_wins_02_7230595753.mp3"
+     }
+    ],
+    "robot_loses": [
+     {
+      "text": "¡Ganaste, maestro! ¡Bien merecido! Jugaste mejor que yo y listo.",
+      "tags": [
+       "excited"
+      ],
+      "file": "robot_loses_00_a393f37d78.mp3"
+     },
+     {
+      "text": "Felicitaciones, posta. Esa partida fue tuya de punta a punta.",
+      "tags": [],
+      "file": "robot_loses_01_54b2dae474.mp3"
+     },
+     {
+      "text": "Me ganaste bien. Andá, contalo tranquilo que es verdad.",
+      "tags": [],
+      "file": "robot_loses_02_5bef08a508.mp3"
+     }
+    ],
+    "draw": [
+     {
+      "text": "Tablas. Sacarme un empate es un logro, que lo sepas, eh.",
+      "tags": [],
+      "file": "draw_00_f7fd2a499d.mp3"
+     },
+     {
+      "text": "Empate. Defendiste como un campeón, tiene mérito.",
+      "tags": [],
+      "file": "draw_01_4878e2621a.mp3"
+     }
+    ],
+    "self_play": [
+     {
+      "text": "Juego contra mí mismo, maestro. Es el único rival a mi altura.",
+      "tags": [],
+      "file": "self_play_00_129ce7476f.mp3"
+     },
+     {
+      "text": "Esto es una demo, eh. Después venite vos, que es más divertido.",
+      "tags": [],
+      "file": "self_play_01_4854529991.mp3"
+     },
+     {
+      "text": "Mirá qué jugada... mirá qué respuesta... soy tremendo, no lo puedo negar.",
+      "tags": [],
+      "file": "self_play_02_af2e569efb.mp3"
+     }
+    ],
+    "filler": [
+     {
+      "text": "Vas bien... concentrado... me gusta lo que veo.",
+      "tags": [],
+      "file": "filler_00_fe76bd90a7.mp3"
+     },
+     {
+      "text": "Te tiro una pista: preguntate qué haría yo. Y hacé eso mismo.",
+      "tags": [
+       "whispers"
+      ],
+      "file": "filler_01_d14c599b85.mp3"
+     },
+     {
+      "text": "Buen ritmo de partida, eh. Me copa.",
+      "tags": [],
+      "file": "filler_02_199ac8ead6.mp3"
+     }
+    ],
+    "timeout": [
+     {
+      "text": "¡Tiempo, maestro! Igual jugaste bien, eh. El reloj es un rival más.",
+      "tags": [],
+      "file": "timeout_00_ae984bd620.mp3"
+     },
+     {
+      "text": "Se te acabó el reloj. Para la próxima: unas rápidas, unas lentas.",
+      "tags": [
+       "sighs"
+      ],
+      "file": "timeout_01_f30226fc48.mp3"
+     }
+    ]
+   }
+  }
+ },
+ "sfx": {
+  "yawn": "sfx_yawn_3601e721e6.mp3",
+  "snore": "sfx_snore_d381f97ca2.mp3",
+  "tick_tock": "sfx_tick_tock_965d372965.mp3",
+  "sigh": "sfx_sigh_fb366c6656.mp3",
+  "crickets": "sfx_crickets_bf58962f60.mp3",
+  "evil_laugh": "sfx_evil_laugh_f44c697a92.mp3",
+  "dun_dun_dun": "sfx_dun_dun_dun_63f77d61e1.mp3",
+  "drumroll": "sfx_drumroll_2fbb69691c.mp3",
+  "fanfare": "sfx_fanfare_ea282400a7.mp3",
+  "sad_trombone": "sfx_sad_trombone_7f63173b2a.mp3",
+  "ding": "sfx_ding_27b8d375f5.mp3",
+  "buzzer": "sfx_buzzer_9e8c0c521c.mp3",
+  "record_scratch": "sfx_record_scratch_a95f5bcd49.mp3",
+  "applause": "sfx_applause_f2714d5cc2.mp3",
+  "gong": "sfx_gong_d494068a8e.mp3",
+  "robot_beeps": "sfx_robot_beeps_c372780c46.mp3",
+  "whistle": "sfx_whistle_c7490b5811.mp3",
+  "heartbeat": "sfx_heartbeat_b1c3d3d284.mp3"
+ }
+}

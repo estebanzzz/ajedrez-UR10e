@@ -8,10 +8,23 @@ const DIFFICULTIES = [
   { id: 'maximo', label: 'Máximo', mult: '×3' },
 ]
 
-export default function StartScreen({ onStarted }) {
+// Reloj del jugador: corre solo en su turno; a 0, gana el robot.
+const TIMES = [
+  { minutes: 3, label: '3 min' },
+  { minutes: 5, label: '5 min' },
+  { minutes: 10, label: '10 min' },
+  { minutes: 0, label: 'Sin reloj' },
+]
+
+export default function StartScreen({ onStarted, speech }) {
   const [name, setName] = useState('')
   const [difficulty, setDifficulty] = useState('intermedio')
+  const [timeMinutes, setTimeMinutes] = useState(5)
+  const [personality, setPersonality] = useState(null)
   const [busy, setBusy] = useState(false)
+  // Personalidades/voces del robot (las define el backend).
+  const personalities = speech?.personalities || []
+  const voice = personality ?? speech?.personality
   const valid = name.trim().split(/\s+/).length >= 2 // nombre y apellido
 
   const start = async () => {
@@ -19,9 +32,29 @@ export default function StartScreen({ onStarted }) {
     setBusy(true)
     try {
       await api('/api/game/new', {
+        mode: 'human',
         human_color: 'white',
         player_name: name.trim(),
         difficulty,
+        time_minutes: timeMinutes,
+        ...(voice ? { personality: voice } : {}),
+      })
+      onStarted?.()
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  // Modo demo: el robot juega contra sí mismo (no requiere nombre ni entra
+  // al ranking). Útil para atraer público cuando no hay nadie jugando.
+  const startSelfPlay = async () => {
+    if (busy) return
+    setBusy(true)
+    try {
+      await api('/api/game/new', {
+        mode: 'self_play',
+        difficulty,
+        ...(voice ? { personality: voice } : {}),
       })
       onStarted?.()
     } finally {
@@ -62,9 +95,50 @@ export default function StartScreen({ onStarted }) {
           A mayor dificultad, más puntos: se premia ganar, resistir jugadas y
           capturar piezas.
         </p>
+        {personalities.length > 1 && (
+          <>
+            <label>Voz del robot</label>
+            <div className="difficulty-row personality-row">
+              {personalities.map((p) => (
+                <button
+                  key={p.id}
+                  className={voice === p.id ? 'selected' : ''}
+                  onClick={() => setPersonality(p.id)}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+        <label>Tu tiempo (corre solo en tu turno)</label>
+        <div className="difficulty-row time-row">
+          {TIMES.map((t) => (
+            <button
+              key={t.minutes}
+              className={timeMinutes === t.minutes ? 'selected' : ''}
+              onClick={() => setTimeMinutes(t.minutes)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        {timeMinutes > 0 && (
+          <p className="hint">Si tu reloj llega a cero, gana el robot.</p>
+        )}
         <button className="play-button" disabled={!valid || busy} onClick={start}>
           ▶ Jugar
         </button>
+        <div className="or-divider">
+          <span>o</span>
+        </div>
+        <button className="demo-button" disabled={busy} onClick={startSelfPlay}>
+          🤖 Ver al robot jugar contra sí mismo
+        </button>
+        <p className="hint">
+          Demostración: el robot mueve las blancas y las negras con la
+          dificultad elegida. No suma al ranking.
+        </p>
       </div>
     </div>
   )

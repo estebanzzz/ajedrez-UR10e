@@ -13,6 +13,10 @@ puerto 63352 del robot; no requiere programa corriendo en el pendant).
    PROFINET en *Deshabilitado*, sin unidades MODBUS. Si quedan activos,
    ocupan los registros RTDE y `ur_rtde` no puede conectarse
    (`RTDE input registers are already in use`).
+3. **Guardar la instalación** después de tocar el fieldbus (Guardar →
+   *Guardar instalación como…* sobre la instalación activa, o *Guardar todo*).
+   Si no se guarda, el cambio se pierde al apagar el robot y el backend
+   vuelve a fallar con el error de registros ocupados en el próximo arranque.
 
 ## Arranque del backend con el robot
 
@@ -23,15 +27,19 @@ CHESS_DRIVER=mock CHESS_ROBOT_HOST=192.168.0.25 python -m app.api.server
 En la Pi se usa el driver real del tablero (`CHESS_DRIVER=s7`). La dependencia
 `ur_rtde` está en `requirements-pi.txt`.
 
-## Calibración (teach por freedrive)
+## Calibración (teach por freedrive y/o jog)
 
 Abrir `http://<backend>:8000/calibration`:
 
-1. **Activar freedrive** y llevar la punta de la garra (cerrada) al punto que
-   indica el asistente: centros de las casillas a1, h1, a8 y h8 tocando la
-   superficie, y luego los slots de referencia de cada bandeja (slot 0, slot
-   vecino de la misma fila y, si tiene más de una fila, el primer slot de la
-   fila 2).
+1. Llevar la punta de la garra (cerrada) al punto que indica el asistente:
+   centros de las casillas a1, h1, a8 y h8 tocando la superficie, y luego
+   los slots de referencia de cada bandeja (slot 0, slot vecino de la misma
+   fila y, si tiene más de una fila, el primer slot de la fila 2). Dos formas
+   de mover el robot, combinables:
+   - **Freedrive** (grueso): mover el brazo a mano.
+   - **Jog por coordenadas** (fino, recomendado para capturar): panel de
+     pasos relativos X/Y/Z de 20/5/1/0.2 mm con moveL lento y orientación
+     fija (`POST /api/robot/jog`). Requiere freedrive desactivado.
 2. **Capturar punto** en cada posición. *Deshacer último* permite repetir.
 3. **Guardar calibración**: valida medidas (tamaño de casilla, lados opuestos,
    alturas) y escribe `backend/config/calibration.json`. El servidor debe
@@ -69,6 +77,7 @@ segfault en la librería nativa, así que el backend debe correr **supervisado**
 | --- | --- |
 | `GET /api/robot/status` | conexión, pose TCP, articulaciones, modo, garra |
 | `POST /api/robot/freedrive` | `{"enabled": true\|false}` |
+| `POST /api/robot/jog` | `{"axis": "x\|y\|z", "delta_mm": ±50}` paso relativo lento |
 | `POST /api/robot/gripper` | `{"opening_mm": 0-50, "force": 0-1}` |
 | `POST /api/calibration/start\|capture\|back\|save` | asistente de teach |
 | `GET /api/calibration/state` | estado de la sesión |

@@ -8,11 +8,14 @@ la limitación. ``RandomEngine`` es un sustituto para desarrollo sin binario.
 from __future__ import annotations
 
 import random
+import logging
 import shutil
 from dataclasses import dataclass
 
 import chess
 import chess.engine
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -52,10 +55,34 @@ def find_stockfish() -> str | None:
 class StockfishEngine:
     """Motor Stockfish vía UCI. Usar como context manager o llamar a close()."""
 
+    # Al arrancar la Pi, Stockfish puede tardar más que los 10 s por defecto
+    # de python-chess en responder al handshake UCI (boot cargado: Chromium,
+    # red, cámara). Si el motor no responde, el servicio moría y el kiosk
+    # quedaba con la página en blanco: timeout amplio y reintentos.
+    INIT_TIMEOUT_S = 60.0
+    INIT_RETRIES = 3
+
     def __init__(self, binary_path: str, difficulty: str = "intermedio") -> None:
-        self._engine = chess.engine.SimpleEngine.popen_uci(binary_path)
+        self._engine = self._open(binary_path)
         self._difficulty = DIFFICULTY_PRESETS[difficulty]
         self._apply_difficulty()
+
+    @classmethod
+    def _open(cls, binary_path: str) -> chess.engine.SimpleEngine:
+        last_exc: Exception | None = None
+        for attempt in range(1, cls.INIT_RETRIES + 1):
+            try:
+                return chess.engine.SimpleEngine.popen_uci(
+                    binary_path, timeout=cls.INIT_TIMEOUT_S
+                )
+            except (TimeoutError, chess.engine.EngineError, OSError) as exc:
+                last_exc = exc
+                logger.warning(
+                    "Stockfish no respondió (intento %d/%d): %s",
+                    attempt, cls.INIT_RETRIES, exc,
+                )
+        assert last_exc is not None
+        raise last_exc
 
     def _apply_difficulty(self) -> None:
         preset = self._difficulty

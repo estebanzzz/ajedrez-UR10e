@@ -1,0 +1,9 @@
+{
+  "threshold_scale": 1.15,
+  "motion_threshold": 8.0,
+  "stable_reads": 3,
+  "disc_radius": 0.3,
+  "weight_brightness": 1.0,
+  "weight_color": 1.0,
+  "weight_edges": 1.0
+}

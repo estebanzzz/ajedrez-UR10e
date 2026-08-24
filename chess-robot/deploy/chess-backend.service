@@ -1,20 +1,43 @@
 # systemd unit del backend (Raspberry Pi).
+# Referencia para instalación manual: `deploy_to_pi.ps1 -Install` genera este
+# mismo unit sustituyendo usuario y rutas por los reales de cada Pi.
+#
 # Instalación:
 #   sudo cp chess-backend.service /etc/systemd/system/
 #   sudo systemctl daemon-reload && sudo systemctl enable --now chess-backend
 [Unit]
-Description=Chess Robot backend (FastAPI + sensores + UR10e)
+Description=Chess Robot backend (FastAPI + vision + UR10e)
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
-User=pi
-WorkingDirectory=/home/pi/chess-robot/backend
-Environment=CHESS_DRIVER=matrix
-Environment=CHESS_ROBOT_HOST=192.168.1.10
+User=esteban
+WorkingDirectory=/home/esteban/robot-ajedrez/chess-robot/backend
+# systemd no hereda el PATH del login y stockfish vive en /usr/games: sin esta
+# línea el motor no se encuentra y la partida cae al motor aleatorio.
+Environment=PATH=/usr/games:/usr/local/bin:/usr/bin:/bin
+# Detección de producción: cámara Basler GigE (los drivers s7/matrix quedan
+# como respaldo legado — ver README).
+Environment=CHESS_DRIVER=vision
+Environment=CHESS_ROBOT_HOST=192.168.0.25
+# Margen para que el UR complete el pick & place a velocidad reducida antes de
+# dar la jugada por fallida y pasar a resync (default del código: 10 s).
+Environment=CHESS_ROBOT_VERIFY_TIMEOUT=45
 Environment=CHESS_DIFFICULTY=intermedio
-ExecStart=/home/pi/chess-robot/backend/.venv/bin/python -m app.api.server
+# Voz del robot (docs/voice.md): 0 mudo · 1 comenta la partida · 2 provoca.
+Environment=CHESS_ROBOT_VOICE_LEVEL=2
+# Con parlante en la Pi (`sudo apt install mpg123`), el backend reproduce los
+# audios; sin esta línea los reproduce Chromium (ver flag en kiosk.md).
+#Environment=CHESS_ROBOT_SPEECH_PLAYER=mpg123 -q
+# Telemetría hacia Neuronal HUB por MQTT (docs/supervision.md). Descomentar y
+# completar con la IP y credenciales que pasa el equipo del HUB; sin
+# CHESS_MQTT_HOST el puente queda apagado.
+#Environment=CHESS_MQTT_HOST=192.168.0.XX
+#Environment=CHESS_MQTT_PORT=1883
+#Environment=CHESS_MQTT_USERNAME=usuario
+#Environment=CHESS_MQTT_PASSWORD=contraseña
+ExecStart=/home/esteban/robot-ajedrez/chess-robot/backend/.venv/bin/python -m app.api.server
 Restart=on-failure
 RestartSec=3
 # Watchdog simple: si el proceso muere, systemd lo relanza; los estados de
