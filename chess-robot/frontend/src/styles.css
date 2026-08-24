@@ -21,8 +21,10 @@ body {
 
 .app { display: flex; flex-direction: column; height: 100%; padding: 1rem 1.5rem; gap: .8rem; }
 
-header { display: flex; align-items: baseline; gap: 1rem; }
+header { display: flex; align-items: center; gap: 1rem; }
 header h1 { font-size: 1.4rem; cursor: default; }
+/* Logo de Arbyte: el PNG es transparente y va sobre el fondo oscuro. */
+.brand-logo { height: 2rem; width: auto; display: block; }
 .disconnected { color: #e66; font-size: .85rem; }
 
 .banner {

@@ -7,6 +7,7 @@ import Ranking from './Ranking.jsx'
 import RobotVoice from './RobotVoice.jsx'
 import SideNav from './SideNav.jsx'
 import StartScreen from './StartScreen.jsx'
+import arbyteLogo from './assets/arbyte-logo.png'
 import { api, useSocket } from './useGameSocket.js'
 
 const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
@@ -259,6 +260,7 @@ export default function App() {
       <SideNav active="/ui" />
 
       <header>
+        <img className="brand-logo" src={arbyteLogo} alt="Arbyte" />
         <h1 onClick={handleTitleTap}>♞ Robot Ajedrecista</h1>
         {!connected && <span className="disconnected">sin conexión</span>}
       </header>
