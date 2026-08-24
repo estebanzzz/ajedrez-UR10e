@@ -203,6 +203,20 @@ def test_captured_knight_also_closes_fully_and_own_piece_does_not():
     assert openings[4] == 18.0  # cierre sobre la dama propia
 
 
+def test_place_releases_above_grip_height():
+    """La pieza se suelta ~10 mm por encima de la altura a la que se agarró:
+    apoya con una caída mínima en vez de empujarse contra el tablero."""
+    controller, robot = make_controller()
+    controller.execute_move(chess.Board(), chess.Move.from_uci("e2e4"))
+    e2 = BOARD.square_center(chess.E2)
+    params = controller.piece_params[chess.PAWN]
+    zs = {round(a.pose.position.z, 4) for a in robot.moves}
+    grip_z = round(e2.z + params.grip_height_m, 4)
+    drop_z = round(grip_z + MotionParams().place_clearance_m, 4)
+    assert grip_z in zs  # el agarre baja a la altura calibrada
+    assert drop_z in zs  # la suelta queda el margen por encima
+
+
 def test_illegal_move_rejected():
     controller, _ = make_controller()
     with pytest.raises(ValueError):

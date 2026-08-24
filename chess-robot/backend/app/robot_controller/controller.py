@@ -44,6 +44,10 @@ class MotionParams:
     # Pausa tras cerrar la garra (asentar el agarre antes de levantar) y
     # tras abrirla (que la pieza apoye antes de retirarse).
     grip_settle_s: float = 0.4
+    # Al soltar, la pieza se libera este margen POR ENCIMA de la altura a la
+    # que se agarró: apoya con una caída mínima en vez de empujarse contra
+    # el tablero (o la bandeja).
+    place_clearance_m: float = 0.010
     # Tope de apertura de la garra durante el juego (mm): las aperturas de
     # aproximación por pieza se recortan a este valor.
     max_opening_mm: float = 50.0
@@ -182,7 +186,13 @@ class RobotController:
         (altura segura) sobre la casilla, por si hay que subir ahí después."""
         params = self._pieces[piece_type]
         motion = self._motion
-        drop = Pose(Point3(position.x, position.y, position.z + params.grip_height_m))
+        drop = Pose(
+            Point3(
+                position.x,
+                position.y,
+                position.z + params.grip_height_m + motion.place_clearance_m,
+            )
+        )
         transit = drop.at_height(self._transit_z)
         retreat = drop.at_height(drop.position.z + motion.approach_clearance_m)
 
