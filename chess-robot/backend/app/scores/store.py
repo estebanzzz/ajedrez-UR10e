@@ -64,9 +64,20 @@ class ScoreStore:
                 result TEXT NOT NULL,         -- win / draw / loss
                 difficulty TEXT NOT NULL,
                 moves INTEGER NOT NULL,
-                material INTEGER NOT NULL
+                material INTEGER NOT NULL,
+                -- Contacto del jugador (premio). PRIVADO: ninguna consulta
+                -- que alimente la API/UI debe seleccionar esta columna.
+                email TEXT NOT NULL DEFAULT ''
             )"""
         )
+        # Migración de bases anteriores a la columna email.
+        columns = {
+            row[1] for row in self._conn.execute("PRAGMA table_info(games)")
+        }
+        if "email" not in columns:
+            self._conn.execute(
+                "ALTER TABLE games ADD COLUMN email TEXT NOT NULL DEFAULT ''"
+            )
         # Log completo de partidas (todas: humanas, demos, abandonadas y
         # abortadas) para el sistema de supervisión de la feria. La tabla
         # `games` de arriba queda solo para el ranking/premio diario.
@@ -105,12 +116,13 @@ class ScoreStore:
         moves: int,
         material: int,
         when: datetime | None = None,
+        email: str = "",
     ) -> None:
         when = when or datetime.now()
         with self._lock:
             self._conn.execute(
-                "INSERT INTO games (ts, day, name, score, result, difficulty, moves, material)"
-                " VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO games (ts, day, name, score, result, difficulty, moves, material, email)"
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     when.isoformat(timespec="seconds"),
                     when.strftime("%Y-%m-%d"),
@@ -120,6 +132,7 @@ class ScoreStore:
                     difficulty,
                     moves,
                     material,
+                    email.strip().lower(),
                 ),
             )
             self._conn.commit()
@@ -143,6 +156,15 @@ class ScoreStore:
             "SELECT name, score, result, difficulty, moves, ts, day FROM games"
             " ORDER BY score DESC, id ASC LIMIT ?",
             (limit,),
+        )
+
+    def emails(self) -> list[dict]:
+        """Contactos registrados (nombre + email + primera partida), para
+        extraer la lista fuera de la feria. NO se expone por la API."""
+        return self._rows(
+            "SELECT email, name, MIN(ts) AS first_ts, COUNT(*) AS games"
+            " FROM games WHERE email != '' GROUP BY email ORDER BY first_ts",
+            (),
         )
 
     # -------------------------------------------- log completo / supervisión

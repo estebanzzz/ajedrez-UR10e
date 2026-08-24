@@ -392,6 +392,31 @@ def test_confirm_out_of_turn_is_rejected(rig):
     assert status["last_error"] == "No es el turno del humano."
 
 
+def test_player_email_saved_but_never_exposed(tmp_path):
+    """El email del jugador va a la base de puntajes y no aparece en ningún
+    estado que consuma la UI."""
+    import json
+
+    from app.scores import ScoreStore
+
+    scores = ScoreStore(tmp_path / "scores.db")
+    rig = Rig(["e7e5"], scores=scores)
+    try:
+        rig.orchestrator.new_game(
+            human_color=chess.WHITE,
+            player_name="Ana García",
+            player_email="Ana@Mail.com",
+        )
+        status = rig.human_plays("e2e4")
+        assert "ana@mail.com" not in json.dumps(status).lower()
+
+        status = rig.orchestrator.resign()
+        assert "ana@mail.com" not in json.dumps(status).lower()
+        assert scores.emails()[0]["email"] == "ana@mail.com"
+    finally:
+        rig.stop()
+
+
 def test_finished_game_records_score(tmp_path):
     from app.scores import ScoreStore
 

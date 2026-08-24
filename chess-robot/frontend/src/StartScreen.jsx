@@ -18,6 +18,7 @@ const TIMES = [
 
 export default function StartScreen({ onStarted, onClose, speech }) {
   const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
   const [difficulty, setDifficulty] = useState('intermedio')
   const [timeMinutes, setTimeMinutes] = useState(5)
   const [personality, setPersonality] = useState(null)
@@ -25,7 +26,9 @@ export default function StartScreen({ onStarted, onClose, speech }) {
   // Personalidades/voces del robot (las define el backend).
   const personalities = speech?.personalities || []
   const voice = personality ?? speech?.personality
-  const valid = name.trim().split(/\s+/).length >= 2 // nombre y apellido
+  const nameValid = name.trim().split(/\s+/).length >= 2 // nombre y apellido
+  const emailValid = /^\S+@\S+\.\S+$/.test(email.trim())
+  const valid = nameValid && emailValid
 
   const start = async () => {
     if (!valid || busy) return
@@ -35,6 +38,7 @@ export default function StartScreen({ onStarted, onClose, speech }) {
         mode: 'human',
         human_color: 'white',
         player_name: name.trim(),
+        player_email: email.trim(),
         difficulty,
         time_minutes: timeMinutes,
         ...(voice ? { personality: voice } : {}),
@@ -79,10 +83,26 @@ export default function StartScreen({ onStarted, onClose, speech }) {
           maxLength={40}
           placeholder="Ej: Ana García"
           onChange={(e) => setName(e.target.value)}
+        />
+        {!nameValid && name.length > 0 && (
+          <p className="hint">Escribí nombre y apellido para entrar al ranking</p>
+        )}
+        <label htmlFor="player-email">Email</label>
+        <input
+          id="player-email"
+          type="email"
+          value={email}
+          maxLength={80}
+          placeholder="Ej: ana@mail.com"
+          onChange={(e) => setEmail(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && start()}
         />
-        {!valid && name.length > 0 && (
-          <p className="hint">Escribí nombre y apellido para entrar al ranking</p>
+        <p className="hint">
+          Solo para avisarte si ganás el premio del día. No se muestra en
+          pantalla.
+        </p>
+        {!emailValid && email.length > 0 && (
+          <p className="hint">Escribí un email válido</p>
         )}
         <label>Dificultad</label>
         <div className="difficulty-row">

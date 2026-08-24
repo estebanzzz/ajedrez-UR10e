@@ -63,15 +63,21 @@ function Invoke-RemoteScript {
   foreach ($a in $Arguments) {
     if ($a -match "'") { Fail "Argumento remoto invalido (comillas simples): $a" }
   }
-  $local = Join-Path $env:TEMP "chess-remote-step.sh"
+  # Nombre unico por paso: con un nombre fijo, un script corto escrito sobre
+  # uno mas largo puede terminar ejecutando restos del anterior (bash recibe
+  # lineas sueltas del paso previo, con errores de sintaxis y, peor, comandos
+  # destructivos fuera de contexto).
+  $stamp  = [guid]::NewGuid().ToString("N").Substring(0, 8)
+  $remote = "/tmp/chess-remote-step-$stamp.sh"
+  $local  = Join-Path $env:TEMP "chess-remote-step-$stamp.sh"
   $body = $Script -replace "`r`n", "`n"
   [IO.File]::WriteAllText($local, $body, (New-Object Text.UTF8Encoding $false))
-  & scp -q $local ($target + ":/tmp/chess-remote-step.sh")
+  & scp -q $local ($target + ":$remote")
   if ($LASTEXITCODE -ne 0) { Fail "No se pudo copiar el script remoto" }
   Remove-Item $local -Force
 
   $quoted = ($Arguments | ForEach-Object { "'" + $_ + "'" }) -join " "
-  $cmd = "bash /tmp/chess-remote-step.sh $quoted; rc=`$?; rm -f /tmp/chess-remote-step.sh; exit `$rc"
+  $cmd = "bash $remote $quoted; rc=`$?; rm -f $remote; exit `$rc"
   # LogLevel=ERROR: con -t, ssh escribe "Connection to ... closed." en stderr y
   # PowerShell lo muestra como si fuera un error del deploy.
   if ($Interactive) { & ssh -t -o LogLevel=ERROR $target $cmd } else { & ssh $target $cmd }
@@ -167,6 +173,13 @@ tar --delay-directory-restore --warning=no-unknown-keyword \
 chmod -R u+rwX,go+rX "$tmp"
 cp -a "$tmp/." "$dest/"
 rm -f /tmp/chess-robot-deploy.tgz
+# El kiosk se sirve desde frontend/dist y mas arriba se borro el viejo: si el
+# nuevo no llego, /ui devuelve 404 y la pantalla de la expo queda en blanco.
+# Abortar aca evita ademas reiniciar el backend sobre una instalacion rota.
+if [ ! -f "$dest/frontend/dist/index.html" ]; then
+  echo "  ERROR: frontend/dist no llego a $dest" >&2
+  exit 1
+fi
 # cp no borra: los archivos eliminados en el repo quedan en la Pi hasta que se
 # limpien a mano (no molestan, pero conviene saberlo).
 echo "  desempaquetado en $dest ($(find "$dest" -type f | wc -l) archivos)"

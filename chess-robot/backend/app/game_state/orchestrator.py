@@ -124,6 +124,9 @@ class GameOrchestrator:
         self._robot_steps: list[str] = []
         self._evaluation: dict | None = None
         self._player_name = ""
+        # Contacto del jugador: SOLO va a la base de puntajes. No debe
+        # aparecer en status(), last_game ni ningún dato que consuma la UI.
+        self._player_email = ""
         self._last_game: dict | None = None  # puntaje de la última partida
         # Fin forzado sin outcome en el tablero: "RESIGNATION" (abandonó) o
         # "TIMEOUT" (se le acabó el reloj). None mientras la partida sigue.
@@ -227,6 +230,7 @@ class GameOrchestrator:
         self,
         human_color: chess.Color = chess.WHITE,
         player_name: str = "",
+        player_email: str = "",
         self_play: bool = False,
         time_limit_s: float | None = None,
     ) -> None:
@@ -255,6 +259,7 @@ class GameOrchestrator:
             self._robot_steps = []
             self._evaluation = None
             self._player_name = player_name.strip()
+            self._player_email = player_email.strip()
             self._last_game = None
             self._loss_reason = None
             self._started_at = datetime.now()
@@ -585,6 +590,7 @@ class GameOrchestrator:
                     difficulty=difficulty,
                     moves=human_moves,
                     material=material,
+                    email=self._player_email,
                 )
             except Exception:
                 logger.exception("No se pudo registrar el puntaje")

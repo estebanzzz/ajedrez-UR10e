@@ -106,6 +106,9 @@ class NewGameRequest(BaseModel):
     mode: str = "human"  # "human" | "self_play" (el robot juega contra sí mismo)
     human_color: str = "white"  # "white" | "black"
     player_name: str = ""
+    # Contacto para el premio: se guarda en la base y NO se muestra en la UI
+    # ni se devuelve por ningún endpoint.
+    player_email: str = ""
     difficulty: str | None = None
     # Minutos del reloj del humano (solo corre en su turno). None = default
     # del kiosk (CHESS_ROBOT_GAME_MINUTES, 5). 0 = partida sin reloj.
@@ -799,6 +802,7 @@ def create_app(driver_name: str | None = None) -> FastAPI:
         orchestrator.new_game(
             human_color=color,
             player_name=request.player_name,
+            player_email=request.player_email,
             self_play=request.mode == "self_play",
             time_limit_s=None if minutes == 0 else minutes * 60,
         )

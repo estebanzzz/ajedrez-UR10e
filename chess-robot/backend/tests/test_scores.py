@@ -106,6 +106,53 @@ def test_persistence_across_reopen(tmp_path):
 # ------------------------------------------------------- game_log / stats
 
 
+def test_email_saved_privately(tmp_path):
+    """El email queda en la base (para el premio) pero NUNCA sale en los
+    rankings que alimentan la UI."""
+    store = ScoreStore(tmp_path / "scores.db")
+    store.record("Ana García", 800, "loss", "avanzado", 40, 12, email=" Ana@Mail.com ")
+    store.record("Luis Pérez", 500, "loss", "intermedio", 20, 5)  # sin email
+
+    for row in store.top_today() + store.top_alltime():
+        assert "email" not in row
+
+    contacts = store.emails()
+    assert len(contacts) == 1  # los registros sin email no aparecen
+    assert contacts[0]["email"] == "ana@mail.com"  # normalizado
+    assert contacts[0]["name"] == "Ana García"
+    store.close()
+
+
+def test_email_column_migrates_old_database(tmp_path):
+    """Una base creada antes de la columna email se migra sola al abrir."""
+    import sqlite3
+
+    path = tmp_path / "scores.db"
+    conn = sqlite3.connect(path)
+    conn.execute(
+        """CREATE TABLE games (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ts TEXT NOT NULL, day TEXT NOT NULL, name TEXT NOT NULL,
+            score INTEGER NOT NULL, result TEXT NOT NULL,
+            difficulty TEXT NOT NULL, moves INTEGER NOT NULL,
+            material INTEGER NOT NULL
+        )"""
+    )
+    conn.execute(
+        "INSERT INTO games (ts, day, name, score, result, difficulty, moves, material)"
+        " VALUES ('2026-08-20T10:00:00', '2026-08-20', 'Viejo', 100, 'loss',"
+        " 'intermedio', 10, 0)"
+    )
+    conn.commit()
+    conn.close()
+
+    store = ScoreStore(path)  # abre y migra
+    store.record("Nueva Alta", 200, "loss", "intermedio", 12, 1, email="n@m.com")
+    assert [c["email"] for c in store.emails()] == ["n@m.com"]
+    assert len(store.top_alltime()) == 2  # la fila vieja sigue intacta
+    store.close()
+
+
 def test_game_log_summary_and_listing(tmp_path):
     store = ScoreStore(tmp_path / "scores.db")
     store.log_game(**log_args())
