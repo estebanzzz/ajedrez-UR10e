@@ -157,7 +157,7 @@ export default function App() {
     prevPhaseRef.current = phase
   }, [status?.phase])
 
-  // Panel de operador oculto: 5 toques rápidos sobre el título.
+  // Panel de operador oculto: 5 toques rápidos sobre el logo del encabezado.
   const handleTitleTap = () => {
     const now = Date.now()
     const taps = tapsRef.current
@@ -260,8 +260,13 @@ export default function App() {
       <SideNav active="/ui" />
 
       <header>
-        <img className="brand-logo" src={arbyteLogo} alt="Arbyte" />
-        <h1 onClick={handleTitleTap}>♞ Robot Ajedrecista</h1>
+        {/* El logo hereda el gesto oculto que antes vivía en el título. */}
+        <img
+          className="brand-logo"
+          src={arbyteLogo}
+          alt="Arbyte"
+          onClick={handleTitleTap}
+        />
         {!connected && <span className="disconnected">sin conexión</span>}
       </header>
 
