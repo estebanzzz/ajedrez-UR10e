@@ -135,3 +135,9 @@ UR10e que limitan el volumen de trabajo al tablero y las bandejas, velocidad y
 fuerza reducidas, y movimiento **solo** en su turno, nunca con una mano sobre
 el tablero. Cualquiera que reproduzca el sistema debe configurar sus propios
 límites de seguridad en el robot antes de operarlo con público cerca.
+
+## Licencia
+
+Código liberado bajo la [licencia MIT](LICENSE). El logo de Arbyte y los audios
+de la voz del robot (`backend/voice/`) son material de marca de la instalación
+y no están cubiertos por esa licencia.
